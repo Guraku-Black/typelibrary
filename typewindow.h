@@ -89,7 +89,7 @@ long typeWindowPeekEvent(typeWindow* parent)
 	if (parent == 0)
 		return 0;
 
-	if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
+	if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
