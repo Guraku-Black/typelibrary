@@ -45,6 +45,8 @@ long typeNeuralLayerPoolingDestroy(typeNeuralLayer* parent)
 	if (parent == 0)
 		return 0;
 
+	typeIndexMapDestroy(&parent->layerMap1);
+
 	return typeNeuralLayerDestroy(parent);
 }
 

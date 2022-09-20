@@ -12,6 +12,7 @@ typedef struct
 long typeWindowCreate(typeWindow* parent, HINSTANCE hInstance, WNDPROC windowProc);
 long typeWindowGetEvent(typeWindow* parent);
 long typeWindowPeekEvent(typeWindow* parent);
+long typeWindowTextOut(typeWindow* parent, long x, long y, LPCWSTR text, DWORD length);
 long typeWindowDestroy(typeWindow* parent);
 
 const WCHAR  windowClass[] = L"windowClass";
@@ -96,6 +97,19 @@ long typeWindowPeekEvent(typeWindow* parent)
 	}
 
 	return parent->Running;
+}
+
+long typeWindowTextOut(typeWindow* parent, long x, long y, LPCWSTR text, DWORD length)
+{
+	HDC     hdc;
+
+	hdc = GetDC(parent->windowHandle);
+
+	TextOut(hdc, x, y, text, length);
+
+	ReleaseDC(parent->windowHandle, hdc);
+
+	return 1;
 }
 
 long typeWindowDestroy(typeWindow* parent)

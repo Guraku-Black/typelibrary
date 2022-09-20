@@ -47,6 +47,9 @@ long typeNeuralLayerScalingDestroy(typeNeuralLayer* parent)
 	if (parent == 0)
 		return 0;
 
+	typeIndexMapDestroy(&parent->layerMap1);
+	typeIndexMapDestroy(&parent->layerMap2);
+
 	return typeNeuralLayerDestroy(parent);
 }
 

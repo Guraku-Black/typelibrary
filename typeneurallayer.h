@@ -5,23 +5,28 @@
 #include "typeindexmap.h"
 #include <string.h>
 
-enum neuralType
+enum layerType
 {
 	TYPE_NEURAL_LAYER_NULL,
 	TYPE_NEURAL_LAYER_BIAS,
 	TYPE_NEURAL_LAYER_SCALING,
-	TYPE_NEURAL_LAYER_POOLING
+	TYPE_NEURAL_LAYER_POOLING,
+	TYPE_NEURAL_LAYER_CONVOLUTION,
+	TYPE_NEURAL_LAYER_TRANSFER
 };
 
 typedef struct
 {
 	unsigned long     layerType;
+	unsigned long     layerValue1;
 	typeIndexMap      layerMap1;
 	typeIndexMap      layerMap2;
 	typeNeuralArray   layerOutputs;
 	typeNeuralArray   layerWeights;
 	typeNeuralArray   layerVectors;
 	typeNeuralArray   layerDeltas;
+	typeNeuralArray   layerAlphas;
+	typeNeuralArray   layerGammas;
 } typeNeuralLayer;
 
 long typeNeuralLayerCreate(typeNeuralLayer* parent, unsigned long width, unsigned long height, unsigned long depth);

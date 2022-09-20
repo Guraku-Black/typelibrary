@@ -11,9 +11,11 @@ long typeNeuralLayerBiasCreate(typeNeuralLayer* parent, unsigned long width, uns
 
 		typeNeuralArrayCreate(&parent->layerWeights, width, height, depth);
 		typeNeuralArrayCreate(&parent->layerVectors, width, height, depth);
+		typeNeuralArrayCreate(&parent->layerGammas, width, height, depth);
 
 		typeNeuralArrayFillRandom(&parent->layerWeights);
 		typeNeuralArrayFillZero(&parent->layerVectors);
+		typeNeuralArrayFillZero(&parent->layerGammas);
 
 		return 1;
 	}
@@ -44,7 +46,7 @@ long typeNeuralLayerBiasBackPropagate(typeNeuralLayer* parent, typeNeuralLayer* 
 
 long typeNeuralLayerBiasUpdateWeights(typeNeuralLayer* parent, typeNeuralLayer* next, typeNeuralUnit learningrate, typeNeuralUnit momentum)
 {
-	typeNeuralArrayUpdateMomentum(&parent->layerWeights, &parent->layerVectors, &parent->layerDeltas, learningrate, momentum);
+	typeNeuralArrayUpdateAdagrad(&parent->layerWeights, &parent->layerVectors, &parent->layerGammas, &parent->layerDeltas, learningrate, momentum);
 
 	return 1;
 }

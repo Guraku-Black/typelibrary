@@ -6,6 +6,8 @@
 #include "typeneurallayerbias.h"
 #include "typeneurallayerscaling.h"
 #include "typeneurallayerpooling.h"
+#include "typeneurallayerconvolution.h"
+#include "typeneurallayertransfer.h"
 
 typedef struct
 {
@@ -18,6 +20,7 @@ long typeNeuralNetworkAddLayerNull(typeNeuralNetwork* parent, unsigned long widt
 long typeNeuralNetworkAddLayerBias(typeNeuralNetwork* parent, unsigned long width, unsigned height, unsigned long depth);
 long typeNeuralNetworkAddLayerScaling(typeNeuralNetwork* parent, unsigned long sourcewidth, unsigned long sourceheight, unsigned long sourcedepth, unsigned long resultwidth, unsigned long resultheight, unsigned long resultdepth);
 long typeNeuralNetworkAddLayerPooling(typeNeuralNetwork* parent, unsigned long sourcewidth, unsigned long sourceheight, unsigned long sourcedepth, unsigned long resultwidth, unsigned long resultheight, unsigned long resultdepth);
+long typeNeuralNetworkAddLayerTransfer(typeNeuralNetwork* parent, unsigned long width, unsigned height, unsigned long depth, unsigned long transfer);
 long typeNeuralNetworkFeedForwardArray(typeNeuralNetwork* parent, typeNeuralArray* source);
 long typeNeuralNetworkBackPropagateArray(typeNeuralNetwork* parent, typeNeuralArray* target);
 long typeNeuralNetworkGetOutputs(typeNeuralNetwork* parent, typeNeuralArray* result);
@@ -119,6 +122,37 @@ long typeNeuralNetworkAddLayerPooling(typeNeuralNetwork* parent,
 		resultwidth, resultheight, resultdepth);
 }
 
+long typeNeuralNetworkAddLayerConvolution(typeNeuralNetwork* parent, 
+	unsigned long sourcewidth, unsigned long sourceheight, unsigned long sourcedepth,
+	unsigned long resultwidth, unsigned long resultheight, unsigned long resultdepth,
+	unsigned long filterwidth, unsigned long filterheight)
+{
+	typeNeuralLayer* layers;
+
+	if (parent == 0)
+		return 0;
+
+	layers = typeNeuralNetworkAddLayer(parent);
+
+	return typeNeuralLayerConvolutionCreate(layers,
+		sourcewidth, sourceheight, sourcedepth,
+		resultwidth, resultheight, resultdepth,
+	    filterwidth, filterheight);
+}
+
+long typeNeuralNetworkAddLayerTransfer(typeNeuralNetwork* parent, unsigned long width, unsigned height, unsigned long depth, unsigned long transfer)
+{
+	typeNeuralLayer* layers;
+
+	if (parent == 0)
+		return 0;
+
+	layers = typeNeuralNetworkAddLayer(parent);
+
+	return typeNeuralLayerTransferCreate(layers, width, height, depth, transfer);
+}
+
+
 long typeNeuralNetworkFeedForwardArray(typeNeuralNetwork* parent, typeNeuralArray* source)
 {
 	typeNeuralLayer* layers;
@@ -208,6 +242,12 @@ long typeNeuralNetworkFeedForward(typeNeuralNetwork* parent)
 			case TYPE_NEURAL_LAYER_POOLING:
 				typeNeuralLayerPoolingFeedForward(&layers[I], &layers[I + 1]);
 				break;
+			case TYPE_NEURAL_LAYER_CONVOLUTION:
+				typeNeuralLayerConvolutionFeedForward(&layers[I], &layers[I + 1]);
+				break;
+			case TYPE_NEURAL_LAYER_TRANSFER:
+				typeNeuralLayerTransferFeedForward(&layers[I], &layers[I + 1]);
+				break;
 			}
 		}
 	}
@@ -246,6 +286,12 @@ long typeNeuralNetworkBackPropagate(typeNeuralNetwork* parent)
 			case TYPE_NEURAL_LAYER_POOLING:
 				typeNeuralLayerPoolingBackPropagate(&layers[I], &layers[I + 1]);
 				break;
+			case TYPE_NEURAL_LAYER_CONVOLUTION:
+				typeNeuralLayerConvolutionBackPropagate(&layers[I], &layers[I + 1]);
+				break;
+			case TYPE_NEURAL_LAYER_TRANSFER:
+				typeNeuralLayerTransferBackPropagate(&layers[I], &layers[I + 1]);
+				break;
 			}
 		}
 	}
@@ -274,6 +320,9 @@ long typeNeuralNetworkUpdateWeights(typeNeuralNetwork* parent)
 			{
 			case TYPE_NEURAL_LAYER_BIAS:
 				typeNeuralLayerBiasUpdateWeights(&layers[I], &layers[I + 1], 0.01, 0.9);
+				break;
+			case TYPE_NEURAL_LAYER_CONVOLUTION:
+				typeNeuralLayerConvolutionUpdateWeights(&layers[I], &layers[I + 1], 0.01, 0.9);
 				break;
 			}
 		}
@@ -309,6 +358,12 @@ long typeNeuralNetworkDestroy(typeNeuralNetwork* parent)
 				break;
 			case TYPE_NEURAL_LAYER_POOLING:
 				typeNeuralLayerPoolingDestroy(&layers[I]);
+				break;
+			case TYPE_NEURAL_LAYER_CONVOLUTION:
+				typeNeuralLayerConvolutionDestroy(&layers[I]);
+				break;
+			case TYPE_NEURAL_LAYER_TRANSFER:
+				typeNeuralLayerTransferDestroy(&layers[I]);
 				break;
 			}
 		}
