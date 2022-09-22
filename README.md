@@ -1,6 +1,7 @@
-#typelibrary
-/*list of basic library files
-The cudal library files are under kernel.cu
+typelibrary
+list of basic library files.
+
+The CUDA library files are under kernel.cu
 
 1. Turn off optimization for bmp file error.
   ⦁	under "Properties" - "C/C++" - "Optimization", Select Disabled.
