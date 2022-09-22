@@ -32,6 +32,19 @@ extern "C"
 #endif
 
 	#include "E:/Projects/Visual Studio/typelibrary/typeshape.h"
+	#include "E:/Projects/Visual Studio/typelibrary/typeindexmap.h"
+
+	typedef struct
+	{
+		unsigned long   indexWidth;
+		unsigned long   indexHeight;
+		unsigned long   indexLength;
+		unsigned long   indexSize;
+		unsigned long*  indexData;
+	} cudaIndexMap;
+
+	DLLEXPORT long cudaIndexMapCreateTypeCopy(cudaIndexMap* parent, typeIndexMap* source);
+	DLLEXPORT long cudaIndexMapDestroy(cudaIndexMap* parent);
 
 	typedef double     cudaNeuralUnit;
 
@@ -56,6 +69,8 @@ extern "C"
 	DLLEXPORT long cudaNeuralArraySubtract(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralArray* value2);
 	DLLEXPORT long cudaNeuralArrayMultiply(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralArray* value2);
 	DLLEXPORT long cudaNeuralArrayDivide(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralArray* value2);
+	DLLEXPORT long cudaNeuralArrayGetMeanSquaredError(cudaNeuralArray* source, cudaNeuralArray* target, cudaNeuralUnit* result);
+	DLLEXPORT long cudaNeuralArrayIndexMapCopy2D(cudaNeuralArray* result, cudaNeuralArray* source, cudaIndexMap* indexmap);
 	DLLEXPORT long cudaNeuralArrayReverse(cudaNeuralArray* parent, cudaNeuralArray* source);
 	DLLEXPORT long cudaNeuralArrayDestroy(cudaNeuralArray* parent);
 
