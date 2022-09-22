@@ -7,6 +7,7 @@ The CUDA library files are under kernel.cu
   ⦁	under "Properties" - "C/C++" - "Optimization", Select Disabled.
   
 2. To add DLL support. 
+
   Make sure to select all Configuration. Both Debug and release.
   
   a. under Properties > C/C++ > General, Select "Additional Include Directories ", add dll directory.
@@ -18,7 +19,9 @@ The CUDA library files are under kernel.cu
   d. Add Post Build Event. 
   
      under Properties > Build Events > Post-Build Event. 
+     
      add -->  xcopy /y /d "E:\Projects\Visual Studio\cudalibrary\x64\Release\cudalibrary.dll" "$(OutDir)"
+     
      Modify string to include path to dll.
 
 
