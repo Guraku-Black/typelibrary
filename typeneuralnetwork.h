@@ -1,6 +1,8 @@
 #ifndef TYPENEURALNETWORK_H
 #define TYPENEURALNETWORK_H
 
+#include "E:/Projects/Visual Studio/cudalibrary2/cudalibrary.h"
+
 #include "typedynamicarray.h"
 #include "typeneurallayer.h"
 #include "typeneurallayerbias.h"
@@ -21,9 +23,9 @@ long typeNeuralNetworkAddLayerBias(typeNeuralNetwork* parent, unsigned long widt
 long typeNeuralNetworkAddLayerScaling(typeNeuralNetwork* parent, unsigned long sourcewidth, unsigned long sourceheight, unsigned long sourcedepth, unsigned long resultwidth, unsigned long resultheight, unsigned long resultdepth);
 long typeNeuralNetworkAddLayerPooling(typeNeuralNetwork* parent, unsigned long sourcewidth, unsigned long sourceheight, unsigned long sourcedepth, unsigned long resultwidth, unsigned long resultheight, unsigned long resultdepth);
 long typeNeuralNetworkAddLayerTransfer(typeNeuralNetwork* parent, unsigned long width, unsigned height, unsigned long depth, unsigned long transfer);
-long typeNeuralNetworkFeedForwardArray(typeNeuralNetwork* parent, typeNeuralArray* source);
-long typeNeuralNetworkBackPropagateArray(typeNeuralNetwork* parent, typeNeuralArray* target);
-long typeNeuralNetworkGetOutputs(typeNeuralNetwork* parent, typeNeuralArray* result);
+long typeNeuralNetworkFeedForwardArray(typeNeuralNetwork* parent, cudaNeuralArray* source);
+long typeNeuralNetworkBackPropagateArray(typeNeuralNetwork* parent, cudaNeuralArray* target);
+long typeNeuralNetworkGetOutputs(typeNeuralNetwork* parent, cudaNeuralArray* result);
 long typeNeuralNetworkFeedForward(typeNeuralNetwork* parent);
 long typeNeuralNetworkBackPropagate(typeNeuralNetwork* parent);
 long typeNeuralNetworkDestroy(typeNeuralNetwork* parent);
@@ -153,7 +155,7 @@ long typeNeuralNetworkAddLayerTransfer(typeNeuralNetwork* parent, unsigned long 
 }
 
 
-long typeNeuralNetworkFeedForwardArray(typeNeuralNetwork* parent, typeNeuralArray* source)
+long typeNeuralNetworkFeedForwardArray(typeNeuralNetwork* parent, cudaNeuralArray* source)
 {
 	typeNeuralLayer* layers;
 
@@ -164,7 +166,7 @@ long typeNeuralNetworkFeedForwardArray(typeNeuralNetwork* parent, typeNeuralArra
 
 	if (layers)
 	{
-		typeNeuralArrayCopy(&layers[0].layerOutputs, source);
+		cudaNeuralArrayCopy(&layers[0].layerOutputs, source);
 
 		return typeNeuralNetworkFeedForward(parent);
 	}
@@ -172,7 +174,7 @@ long typeNeuralNetworkFeedForwardArray(typeNeuralNetwork* parent, typeNeuralArra
 	return 0;
 }
 
-long typeNeuralNetworkBackPropagateArray(typeNeuralNetwork* parent, typeNeuralArray* target)
+long typeNeuralNetworkBackPropagateArray(typeNeuralNetwork* parent, cudaNeuralArray* target)
 {
 	typeNeuralLayer* layers;
 
@@ -183,7 +185,7 @@ long typeNeuralNetworkBackPropagateArray(typeNeuralNetwork* parent, typeNeuralAr
 
 	if (layers)
 	{
-		typeNeuralArraySubtract(
+		cudaNeuralArraySubtract(
 			&layers[parent->networkLength - 1].layerDeltas, 
 			target, 
 			&layers[parent->networkLength - 1].layerOutputs);
@@ -194,7 +196,7 @@ long typeNeuralNetworkBackPropagateArray(typeNeuralNetwork* parent, typeNeuralAr
 	return 0;
 }
 
-long typeNeuralNetworkGetOutputs(typeNeuralNetwork* parent, typeNeuralArray* result)
+long typeNeuralNetworkGetOutputs(typeNeuralNetwork* parent, cudaNeuralArray* result)
 {
 	typeNeuralLayer* layers;
 
@@ -205,7 +207,7 @@ long typeNeuralNetworkGetOutputs(typeNeuralNetwork* parent, typeNeuralArray* res
 
 	if (layers)
 	{
-		return typeNeuralArrayCopy(result, &layers[parent->networkLength - 1].layerOutputs);
+		return cudaNeuralArrayCopy(result, &layers[parent->networkLength - 1].layerOutputs);
 	}
 
 	return 0;
@@ -378,4 +380,5 @@ long typeNeuralNetworkDestroy(typeNeuralNetwork* parent)
 
 	return 0;
 }
+
 #endif // TYPENEURALNETWORK_H

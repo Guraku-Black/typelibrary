@@ -9,19 +9,20 @@ long typeNeuralLayerBiasCreate(typeNeuralLayer* parent, unsigned long width, uns
 	{
 		parent->layerType = TYPE_NEURAL_LAYER_BIAS;
 
-		typeNeuralArrayCreate(&parent->layerWeights, width, height, depth);
-		typeNeuralArrayCreate(&parent->layerVectors, width, height, depth);
-		typeNeuralArrayCreate(&parent->layerGammas, width, height, depth);
+		cudaNeuralArrayCreate(&parent->layerWeights, width, height, depth);
+		cudaNeuralArrayCreate(&parent->layerVectors, width, height, depth);
+		cudaNeuralArrayCreate(&parent->layerGammas, width, height, depth);
 
-		typeNeuralArrayFillRandom(&parent->layerWeights);
-		typeNeuralArrayFillZero(&parent->layerVectors);
-		typeNeuralArrayFillZero(&parent->layerGammas);
+		cudaNeuralArrayFillZero(&parent->layerWeights);
+		cudaNeuralArrayFillZero(&parent->layerVectors);
+		cudaNeuralArrayFillZero(&parent->layerGammas);
 
 		return 1;
 	}
 
 	return 0;
 }
+
 long typeNeuralLayerBiasFeedForward(typeNeuralLayer* parent, typeNeuralLayer* next)
 {
 	if (parent == 0)
@@ -30,7 +31,7 @@ long typeNeuralLayerBiasFeedForward(typeNeuralLayer* parent, typeNeuralLayer* ne
 	if (parent->layerOutputs.arrayLength != next->layerOutputs.arrayLength)
 		return 0;
 
-	return typeNeuralArrayAdd(&next->layerOutputs, &parent->layerOutputs, &parent->layerWeights);
+	return cudaNeuralArrayAdd(&next->layerOutputs, &parent->layerOutputs, &parent->layerWeights);
 }
 
 long typeNeuralLayerBiasBackPropagate(typeNeuralLayer* parent, typeNeuralLayer* next)
@@ -41,12 +42,12 @@ long typeNeuralLayerBiasBackPropagate(typeNeuralLayer* parent, typeNeuralLayer* 
 	if (parent->layerOutputs.arrayLength != next->layerOutputs.arrayLength)
 		return 0;
 
-	return typeNeuralArrayCopy(&parent->layerDeltas, &next->layerDeltas);
+	return cudaNeuralArrayCopy(&parent->layerDeltas, &next->layerDeltas);
 }
 
-long typeNeuralLayerBiasUpdateWeights(typeNeuralLayer* parent, typeNeuralLayer* next, typeNeuralUnit learningrate, typeNeuralUnit momentum)
+long typeNeuralLayerBiasUpdateWeights(typeNeuralLayer* parent, typeNeuralLayer* next, cudaNeuralUnit learningrate, cudaNeuralUnit momentum)
 {
-	typeNeuralArrayUpdateAdagrad(&parent->layerWeights, &parent->layerVectors, &parent->layerGammas, &parent->layerDeltas, learningrate, momentum);
+	cudaNeuralArrayUpdateAdagrad(&parent->layerWeights, &parent->layerVectors, &parent->layerGammas, &parent->layerDeltas, learningrate, momentum);
 
 	return 1;
 }
@@ -56,8 +57,8 @@ long typeNeuralLayerBiasDestroy(typeNeuralLayer* parent)
 	if (parent == 0)
 		return 0;
 
-	typeNeuralArrayDestroy(&parent->layerWeights);
-	typeNeuralArrayDestroy(&parent->layerVectors);
+	cudaNeuralArrayDestroy(&parent->layerWeights);
+	cudaNeuralArrayDestroy(&parent->layerVectors);
 
 	return typeNeuralLayerDestroy(parent);
 }

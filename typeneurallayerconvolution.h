@@ -10,6 +10,8 @@ long typeNeuralLayerConvolutionCreate(typeNeuralLayer* parent,
 {
 	typeShape     result;
 	typeShape     source;
+	typeIndexMap  indexmap1;
+	typeIndexMap  indexmap2;
 	unsigned long filtercount;
 
 	if (typeNeuralLayerCreate(parent, sourcewidth, sourceheight, sourcedepth))
@@ -18,20 +20,26 @@ long typeNeuralLayerConvolutionCreate(typeNeuralLayer* parent,
 
 		filtercount = (resultdepth * sourcedepth);
 
-		typeNeuralArrayCreate(&parent->layerWeights, filterwidth, filterheight, filtercount);
-		typeNeuralArrayCreate(&parent->layerVectors, filterwidth, filterheight, filtercount);
-		typeNeuralArrayCreate(&parent->layerAlphas, filterwidth, filterheight, filtercount);
-		typeNeuralArrayCreate(&parent->layerGammas, filterwidth, filterheight, filtercount);
+		cudaNeuralArrayCreate(&parent->layerWeights, filterwidth, filterheight, filtercount);
+		cudaNeuralArrayCreate(&parent->layerVectors, filterwidth, filterheight, filtercount);
+		cudaNeuralArrayCreate(&parent->layerAlphas, filterwidth, filterheight, filtercount);
+		cudaNeuralArrayCreate(&parent->layerGammas, filterwidth, filterheight, filtercount);
 
-		typeNeuralArrayFillRandom(&parent->layerWeights);
-		typeNeuralArrayFillZero(&parent->layerVectors);
-		typeNeuralArrayFillZero(&parent->layerGammas);
+		cudaNeuralArrayFillRandom(&parent->layerWeights);
+		cudaNeuralArrayFillZero(&parent->layerVectors);
+		cudaNeuralArrayFillZero(&parent->layerGammas);
 
 		typeShapeAssign(&source, sourcewidth, sourceheight, 1);
 		typeShapeAssign(&result, resultwidth, resultheight, 1);
 
-		typeIndexMapCreateConvolution2D(&parent->layerMap1, &result, &source, filterwidth, filterheight);
-		typeIndexMapCreateConvolution2DTranspose(&parent->layerMap2, &source, &result, filterwidth, filterheight);
+		typeIndexMapCreateConvolution2D(&indexmap1, &result, &source, filterwidth, filterheight);
+		typeIndexMapCreateConvolution2DTranspose(&indexmap2, &source, &result, filterwidth, filterheight);
+
+		cudaIndexMapCreateCopy(&parent->layerMap1, indexmap1.indexWidth, indexmap1.indexHeight, indexmap1.indexData);
+		cudaIndexMapCreateCopy(&parent->layerMap2, indexmap2.indexWidth, indexmap2.indexHeight, indexmap2.indexData);
+
+		typeIndexMapDestroy(&indexmap1);
+		typeIndexMapDestroy(&indexmap2);
 
 		return 1;
 	}
@@ -43,7 +51,7 @@ long typeNeuralLayerConvolutionFeedForward(typeNeuralLayer* parent, typeNeuralLa
 	if (parent == 0)
 		return 0;
 
-	return typeNeuralArrayConvolution2DForward(&next->layerOutputs, &parent->layerOutputs, &parent->layerWeights, &parent->layerMap1);
+	return cudaNeuralArrayIndexMap2DConvolutionForward(&next->layerOutputs, &parent->layerOutputs, &parent->layerWeights, &parent->layerMap1);
 }
 
 long typeNeuralLayerConvolutionBackPropagate(typeNeuralLayer* parent, typeNeuralLayer* next)
@@ -51,16 +59,16 @@ long typeNeuralLayerConvolutionBackPropagate(typeNeuralLayer* parent, typeNeural
 	if (parent == 0)
 		return 0;
 
-	return typeNeuralArrayConvolution2DReverse(&next->layerDeltas, &parent->layerDeltas, &parent->layerWeights, &parent->layerMap2);
+	return cudaNeuralArrayIndexMap2DConvolutionReverse(&next->layerDeltas, &parent->layerDeltas, &parent->layerWeights, &parent->layerMap2);
 }
 
-long typeNeuralLayerConvolutionUpdateWeights(typeNeuralLayer* parent, typeNeuralLayer* next, typeNeuralUnit learningrate, typeNeuralUnit momentum)
+long typeNeuralLayerConvolutionUpdateWeights(typeNeuralLayer* parent, typeNeuralLayer* next, cudaNeuralUnit learningrate, cudaNeuralUnit momentum)
 {
-	typeNeuralArrayConvolution2DGetDerivatives(&next->layerDeltas, &parent->layerOutputs, &parent->layerAlphas, &parent->layerMap1);
+	cudaNeuralArrayIndexMap2DConvolutionGetDerivatives(&next->layerDeltas, &parent->layerOutputs, &parent->layerAlphas, &parent->layerMap1);
 
-	//typeNeuralArrayUpdateMomentum(&parent->layerWeights, &parent->layerVectors, &parent->layerAlphas, learningrate, momentum);
-	//typeNeuralArrayUpdateAdagrad(&parent->layerWeights, &parent->layerVectors, &parent->layerGammas, &parent->layerAlphas, learningrate, momentum);
-	typeNeuralArrayUpdateAdam(&parent->layerWeights, &parent->layerVectors, &parent->layerGammas, &parent->layerAlphas, learningrate, momentum);
+	//cudaNeuralArrayUpdateMomentum(&parent->layerWeights, &parent->layerVectors, &parent->layerAlphas, learningrate, momentum);
+	//cudaNeuralArrayUpdateAdagrad(&parent->layerWeights, &parent->layerVectors, &parent->layerGammas, &parent->layerAlphas, learningrate, momentum);
+	cudaNeuralArrayUpdateAdam(&parent->layerWeights, &parent->layerVectors, &parent->layerGammas, &parent->layerAlphas, learningrate, momentum);
 
 	return 1;
 }
@@ -70,12 +78,12 @@ long typeNeuralLayerConvolutionDestroy(typeNeuralLayer* parent)
 	if (parent == 0)
 		return 0;
 
-	typeNeuralArrayDestroy(&parent->layerWeights);
-	typeNeuralArrayDestroy(&parent->layerVectors);
-	typeNeuralArrayDestroy(&parent->layerAlphas);
+	cudaNeuralArrayDestroy(&parent->layerWeights);
+	cudaNeuralArrayDestroy(&parent->layerVectors);
+	cudaNeuralArrayDestroy(&parent->layerAlphas);
 
-	typeIndexMapDestroy(&parent->layerMap1);
-	typeIndexMapDestroy(&parent->layerMap2);
+	cudaIndexMapDestroy(&parent->layerMap1);
+	cudaIndexMapDestroy(&parent->layerMap2);
 
 	return typeNeuralLayerDestroy(parent);
 }

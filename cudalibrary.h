@@ -31,8 +31,14 @@ extern "C"
 {
 #endif
 
-	#include "E:/Projects/Visual Studio/typelibrary/typeshape.h"
-	#include "E:/Projects/Visual Studio/typelibrary/typeindexmap.h"
+	const unsigned long CUDA_INVALID_INDEX = 0xFFFFFFFF;
+
+	typedef struct
+	{
+		unsigned long     shapeWidth;
+		unsigned long     shapeHeight;
+		unsigned long     shapeDepth;
+	} cudaShape;
 
 	typedef struct
 	{
@@ -43,14 +49,30 @@ extern "C"
 		unsigned long*  indexData;
 	} cudaIndexMap;
 
-	DLLEXPORT long cudaIndexMapCreateTypeCopy(cudaIndexMap* parent, typeIndexMap* source);
+	DLLEXPORT long cudaIndexMapCreateCopy(cudaIndexMap* parent, unsigned long width, unsigned long height, unsigned long* data);
 	DLLEXPORT long cudaIndexMapDestroy(cudaIndexMap* parent);
 
-	typedef double     cudaNeuralUnit;
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+	enum cuda_transferType
+	{
+		CUDA_TRANSFER_RELU,
+		CUDA_TRANSFER_SIGMOID,
+		CUDA_TRANSFER_TANH
+	};
+
+	typedef double      cudaNeuralUnit;
 
 	typedef struct
 	{
-		typeShape       arrayShape;
+		cudaShape       arrayShape;
 		unsigned long   arrayLength;
 		unsigned long   arraySize;
 		cudaNeuralUnit* arrayData;
@@ -70,8 +92,20 @@ extern "C"
 	DLLEXPORT long cudaNeuralArrayMultiply(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralArray* value2);
 	DLLEXPORT long cudaNeuralArrayDivide(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralArray* value2);
 	DLLEXPORT long cudaNeuralArrayGetMeanSquaredError(cudaNeuralArray* source, cudaNeuralArray* target, cudaNeuralUnit* result);
-	DLLEXPORT long cudaNeuralArrayIndexMapCopy2D(cudaNeuralArray* result, cudaNeuralArray* source, cudaIndexMap* indexmap);
-	DLLEXPORT long cudaNeuralArrayReverse(cudaNeuralArray* parent, cudaNeuralArray* source);
+	DLLEXPORT long cudaNeuralArrayIndexMap2DCopy(cudaNeuralArray* result, cudaNeuralArray* source, cudaIndexMap* indexmap);
+	DLLEXPORT long cudaNeuralArrayIndexMap2DPoolingForward(cudaNeuralArray* result, cudaNeuralArray* source, cudaIndexMap* indexmap);
+	DLLEXPORT long cudaNeuralArrayIndexMap2DPoolingReverse(cudaNeuralArray* result, cudaNeuralArray* source, cudaNeuralArray* outputs, cudaIndexMap* indexmap);
+	DLLEXPORT long cudaNeuralArrayIndexMap2DConvolutionForward(cudaNeuralArray* result, cudaNeuralArray* source, cudaNeuralArray* filter, cudaIndexMap* indexmap);
+	DLLEXPORT long cudaNeuralArrayIndexMap2DConvolutionReverse(cudaNeuralArray* result, cudaNeuralArray* source, cudaNeuralArray* filter, cudaIndexMap* indexmap);
+	DLLEXPORT long cudaNeuralArrayIndexMap2DConvolutionGetDerivatives(cudaNeuralArray* result, cudaNeuralArray* source, cudaNeuralArray* filter, cudaIndexMap* indexmap);
+	DLLEXPORT long cudaNeuralArrayMatrixForward(cudaNeuralArray* result, cudaNeuralArray* source, cudaNeuralArray* weights);
+	DLLEXPORT long cudaNeuralArrayMatrixReverse(cudaNeuralArray* result, cudaNeuralArray* source, cudaNeuralArray* weights);
+	DLLEXPORT long cudaNeuralArrayMatrixGetDerivatives(cudaNeuralArray* result, cudaNeuralArray* source, cudaNeuralArray* weights);
+	DLLEXPORT long cudaNeuralArrayTransferForward(cudaNeuralArray* result, cudaNeuralArray* source, unsigned long transfer);
+	DLLEXPORT long cudaNeuralArrayTransferReverse(cudaNeuralArray* result, cudaNeuralArray* source, cudaNeuralArray* outputs, unsigned long transfer);
+	DLLEXPORT long cudaNeuralArrayUpdateMomentum(cudaNeuralArray* weights, cudaNeuralArray* vectors, cudaNeuralArray* deltas, cudaNeuralUnit learningrate, cudaNeuralUnit momentum);
+	DLLEXPORT long cudaNeuralArrayUpdateAdagrad(cudaNeuralArray* weights, cudaNeuralArray* vectors, cudaNeuralArray* gammas, cudaNeuralArray* deltas, cudaNeuralUnit learningrate, cudaNeuralUnit momentum);
+	DLLEXPORT long cudaNeuralArrayUpdateAdam(cudaNeuralArray* weights, cudaNeuralArray* vectors, cudaNeuralArray* gammas, cudaNeuralArray* deltas, cudaNeuralUnit learningrate, cudaNeuralUnit momentum);
 	DLLEXPORT long cudaNeuralArrayDestroy(cudaNeuralArray* parent);
 
 #ifdef __cplusplus

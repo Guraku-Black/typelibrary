@@ -205,7 +205,7 @@ long typeIndexMapCreateScale3D(typeIndexMap* parent, typeShape* result, typeShap
 	unsigned long  XR, YR, ZR;
 	unsigned long  XS, YS, ZS;
 
-	if (typeIndexMapCreate(parent, typeShapeGetLength(result), 1))
+	if (typeIndexMapCreate(parent, (result->shapeWidth * result->shapeHeight), 1))
 	{
 		XM = (unsigned long)type_max(source->shapeWidth, result->shapeWidth);
 		YM = (unsigned long)type_max(source->shapeHeight, result->shapeHeight);
@@ -246,7 +246,7 @@ long typeIndexMapCreateRotate2D(typeIndexMap* parent, typeShape* result, typeSha
 	double         XT, YT;
 	double         xsin, xcos;
 
-	if (typeIndexMapCreate(parent, typeShapeGetLength(result), 1))
+	if (typeIndexMapCreate(parent, (result->shapeWidth * result->shapeHeight), 1))
 	{
 		XC = (double)result->shapeWidth / 2;
 		YC = (double)result->shapeHeight / 2;
@@ -285,7 +285,7 @@ long typeIndexMapCreateConvolution2D(typeIndexMap* parent, typeShape* result, ty
 	long           XT, YT;
 	long           XC, YC;
 
-	if (typeIndexMapCreate(parent, typeShapeGetLength(result), 1))
+	if (typeIndexMapCreate(parent, (result->shapeWidth * result->shapeHeight), 1))
 	{
 		XC = filterwidth / 2;
 		YC = filterheight / 2;
@@ -322,7 +322,7 @@ long typeIndexMapCreateConvolution2DTranspose(typeIndexMap* parent, typeShape* r
 	long           XT, YT;
 	long           XC, YC;
 
-	if (typeIndexMapCreate(parent, typeShapeGetLength(result), 1))
+	if (typeIndexMapCreate(parent, (result->shapeWidth * result->shapeHeight), 1))
 	{
 		XC = filterwidth / 2;
 		YC = filterheight / 2;
@@ -359,7 +359,7 @@ long typeIndexMapCreateConvolution2DAtrous(typeIndexMap* parent, typeShape* resu
 	long           XT, YT;
 	long           XC, YC;
 
-	if (typeIndexMapCreate(parent, typeShapeGetLength(result), 1))
+	if (typeIndexMapCreate(parent, (result->shapeWidth * result->shapeHeight), 1))
 	{
 		XC = filterwidth / 2;
 		YC = filterheight / 2;

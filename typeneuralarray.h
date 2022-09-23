@@ -25,35 +25,35 @@ typedef struct
 
 void initNeuralLibrary();
 
-long (*typeNeuralArrayCreate)(typeNeuralArray* parent, unsigned long width, unsigned long height, unsigned long depth);
-long (*typeNeuralArraySetImageRGB)(typeNeuralArray* parent, unsigned long imagewidth, unsigned long imageheight, unsigned long* imagedata);
-long (*typeNeuralArrayGetImageRGB)(typeNeuralArray* parent, unsigned long imagewidth, unsigned long imageheight, unsigned long* imagedata);
-long (*typeNeuralArrayCopy)(typeNeuralArray* parent, typeNeuralArray* source);
-long (*typeNeuralArrayFillZero)(typeNeuralArray* parent);
-long (*typeNeuralArrayFillOnes)(typeNeuralArray* parent);
-long (*typeNeuralArrayFillRandom)(typeNeuralArray* parent);
-long (*typeNeuralArrayAdd)(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2);
-long (*typeNeuralArraySubtract)(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2);
-long (*typeNeuralArrayMultiply)(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2);
-long (*typeNeuralArrayDivide)(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2);
-long (*typeNeuralArrayGetMeanSquaredError)(typeNeuralArray* parent, typeNeuralArray* target, typeNeuralUnit* result);
-long (*typeNeuralArrayIndexMapCopy2D)(typeNeuralArray* parent, typeNeuralArray* source, typeIndexMap* indexmap);
-long (*typeNeuralArrayIndexMapPooling2DForward)(typeNeuralArray* parent, typeNeuralArray* source, typeIndexMap* indexmap);
-long (*typeNeuralArrayIndexMapPooling2DReverse)(typeNeuralArray* parent, typeNeuralArray* source, typeNeuralArray* outputs, typeIndexMap* indexmap);
-long (*typeNeuralArrayConvolution2DForward)(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* filter, typeIndexMap* indexmap);
-long (*typeNeuralArrayConvolution2DReverse)(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* filter, typeIndexMap* indexmap);
-long (*typeNeuralArrayConvolution2DGetDerivatives)(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* filter, typeIndexMap* indexmap);
-long (*typeNeuralArrayMatrixForward)(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* weights);
-long (*typeNeuralArrayMatrixReverse)(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* outputs, typeNeuralArray* weights);
-long (*typeNeuralArrayMatrixGetDerivatives)(typeNeuralArray* deltas, typeNeuralArray* outputs, typeNeuralArray* derivatives);
-long (*typeNeuralArrayTransferForward)(typeNeuralArray* result, typeNeuralArray* source, unsigned long transfer);
-long (*typeNeuralArrayTransferReverse)(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* outputs, unsigned long transfer);
-long (*typeNeuralArrayUpdateMomentum)(typeNeuralArray* weights, typeNeuralArray* vectors, typeNeuralArray* deltas, typeNeuralUnit learningrate, typeNeuralUnit momentum);
-long (*typeNeuralArrayUpdateAdagrad)(typeNeuralArray* weights, typeNeuralArray* vectors, typeNeuralArray* gammas, typeNeuralArray* deltas, typeNeuralUnit learningrate, typeNeuralUnit momentum);
-long (*typeNeuralArrayUpdateAdam)(typeNeuralArray* weights, typeNeuralArray* vectors, typeNeuralArray* gammas, typeNeuralArray* deltas, typeNeuralUnit learningrate, typeNeuralUnit momentum);
-long (*typeNeuralArrayDestroy)(typeNeuralArray* parent);
+long typeNeuralArrayCreate(typeNeuralArray* parent, unsigned long width, unsigned long height, unsigned long depth);
+long typeNeuralArraySetImageRGB(typeNeuralArray* parent, unsigned long imagewidth, unsigned long imageheight, unsigned long* imagedata);
+long typeNeuralArrayGetImageRGB(typeNeuralArray* parent, unsigned long imagewidth, unsigned long imageheight, unsigned long* imagedata);
+long typeNeuralArrayCopy(typeNeuralArray* parent, typeNeuralArray* source);
+long typeNeuralArrayFillZero(typeNeuralArray* parent);
+long typeNeuralArrayFillOnes(typeNeuralArray* parent);
+long typeNeuralArrayFillRandom(typeNeuralArray* parent);
+long typeNeuralArrayAdd(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2);
+long typeNeuralArraySubtract(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2);
+long typeNeuralArrayMultiply(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2);
+long typeNeuralArrayDivide(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2);
+long typeNeuralArrayGetMeanSquaredError(typeNeuralArray* parent, typeNeuralArray* target, typeNeuralUnit* result);
+long typeNeuralArrayIndexMapCopy2D(typeNeuralArray* parent, typeNeuralArray* source, typeIndexMap* indexmap);
+long typeNeuralArrayIndexMapPooling2DForward(typeNeuralArray* parent, typeNeuralArray* source, typeIndexMap* indexmap);
+long typeNeuralArrayIndexMapPooling2DReverse(typeNeuralArray* parent, typeNeuralArray* source, typeNeuralArray* outputs, typeIndexMap* indexmap);
+long typeNeuralArrayConvolution2DForward(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* filter, typeIndexMap* indexmap);
+long typeNeuralArrayConvolution2DReverse(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* filter, typeIndexMap* indexmap);
+long typeNeuralArrayConvolution2DGetDerivatives(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* filter, typeIndexMap* indexmap);
+long typeNeuralArrayMatrixForward(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* weights);
+long typeNeuralArrayMatrixReverse(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* outputs, typeNeuralArray* weights);
+long typeNeuralArrayMatrixGetDerivatives(typeNeuralArray* deltas, typeNeuralArray* outputs, typeNeuralArray* derivatives);
+long typeNeuralArrayTransferForward(typeNeuralArray* result, typeNeuralArray* source, unsigned long transfer);
+long typeNeuralArrayTransferReverse(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* outputs, unsigned long transfer);
+long typeNeuralArrayUpdateMomentum(typeNeuralArray* weights, typeNeuralArray* vectors, typeNeuralArray* deltas, typeNeuralUnit learningrate, typeNeuralUnit momentum);
+long typeNeuralArrayUpdateAdagrad(typeNeuralArray* weights, typeNeuralArray* vectors, typeNeuralArray* gammas, typeNeuralArray* deltas, typeNeuralUnit learningrate, typeNeuralUnit momentum);
+long typeNeuralArrayUpdateAdam(typeNeuralArray* weights, typeNeuralArray* vectors, typeNeuralArray* gammas, typeNeuralArray* deltas, typeNeuralUnit learningrate, typeNeuralUnit momentum);
+long typeNeuralArrayDestroy(typeNeuralArray* parent);
 
-long _typeNeuralArrayCreate(typeNeuralArray* parent, unsigned long width, unsigned long height, unsigned long depth)
+long typeNeuralArrayCreate(typeNeuralArray* parent, unsigned long width, unsigned long height, unsigned long depth)
 {
 	typeNeuralUnit* data;
 	unsigned long   length;
@@ -92,10 +92,12 @@ long typeNeuralArraySetData(typeNeuralArray* parent, typeNeuralUnit* buffer, uns
 	if (buffersize != parent->arrayLength)
 		return 0;
 
-	return memcpy(parent->arrayData, buffer, buffersize * sizeof(typeNeuralUnit));
+	memcpy(parent->arrayData, buffer, buffersize * sizeof(typeNeuralUnit));
+
+	return 1;
 }
 
-long typeNeuralArrayGetData(typeNeuralArray* parent, typeNeuralUnit* buffer, unsigned long buffersize)
+long _typeNeuralArrayGetData(typeNeuralArray* parent, typeNeuralUnit* buffer, unsigned long buffersize)
 {
 	if ((parent == 0) || (buffer == 0))
 		return 0;
@@ -103,7 +105,9 @@ long typeNeuralArrayGetData(typeNeuralArray* parent, typeNeuralUnit* buffer, uns
 	if (buffersize != parent->arrayLength)
 		return 0;
 
-	return memcpy(parent->arrayData, buffer, buffersize * sizeof(typeNeuralUnit));
+	memcpy(parent->arrayData, buffer, buffersize * sizeof(typeNeuralUnit));
+
+	return 1;
 }
 
 long typeNeuralArrayCopy(typeNeuralArray* parent, typeNeuralArray* source)
@@ -114,10 +118,12 @@ long typeNeuralArrayCopy(typeNeuralArray* parent, typeNeuralArray* source)
 	if (parent->arrayLength != source->arrayLength)
 		return 0;
 
-	return memcpy(parent->arrayData, source->arrayData, parent->arrayLength * sizeof(typeNeuralUnit));
+	memcpy(parent->arrayData, source->arrayData, parent->arrayLength * sizeof(typeNeuralUnit));
+
+	return 1;
 }
 
-long _typeNeuralArraySetImageRGB(typeNeuralArray* parent, unsigned long imagewidth, unsigned long imageheight, unsigned long* imagedata)
+long typeNeuralArraySetImageRGB(typeNeuralArray* parent, unsigned long imagewidth, unsigned long imageheight, unsigned long* imagedata)
 {
 	unsigned long   I, J;
 	unsigned long   A, B, C;
@@ -161,7 +167,7 @@ double neural_maxout(double a)
 
 	return a;
 }
-long _typeNeuralArrayGetImageRGB(typeNeuralArray* parent, unsigned long imagewidth, unsigned long imageheight, unsigned long* imagedata)
+long typeNeuralArrayGetImageRGB(typeNeuralArray* parent, unsigned long imagewidth, unsigned long imageheight, unsigned long* imagedata)
 {
 	unsigned long   I, J;
 	unsigned long   A, B, C;
@@ -195,7 +201,7 @@ long _typeNeuralArrayGetImageRGB(typeNeuralArray* parent, unsigned long imagewid
 	return 1;
 }
 
-long _typeNeuralArrayFillZero(typeNeuralArray* parent)
+long typeNeuralArrayFillZero(typeNeuralArray* parent)
 {
 	unsigned long   I;
 
@@ -210,7 +216,7 @@ long _typeNeuralArrayFillZero(typeNeuralArray* parent)
 	return 1;
 }
 
-long _typeNeuralArrayFillOnes(typeNeuralArray* parent)
+long typeNeuralArrayFillOnes(typeNeuralArray* parent)
 {
 	unsigned long   I;
 
@@ -224,7 +230,7 @@ long _typeNeuralArrayFillOnes(typeNeuralArray* parent)
 
 	return 1;
 }
-long _typeNeuralArrayFillRandom(typeNeuralArray* parent)
+long typeNeuralArrayFillRandom(typeNeuralArray* parent)
 {
 	unsigned long   I;
 
@@ -241,7 +247,7 @@ long _typeNeuralArrayFillRandom(typeNeuralArray* parent)
 	return 1;
 }
 
-long _typeNeuralArrayAdd(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2)
+long typeNeuralArrayAdd(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2)
 {
 	unsigned long   I;
 
@@ -260,7 +266,7 @@ long _typeNeuralArrayAdd(typeNeuralArray* parent, typeNeuralArray* value1, typeN
 	return 1;
 }
 
-long _typeNeuralArraySubtract(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2)
+long typeNeuralArraySubtract(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2)
 {
 	unsigned long   I;
 
@@ -279,7 +285,7 @@ long _typeNeuralArraySubtract(typeNeuralArray* parent, typeNeuralArray* value1, 
 	return 1;
 }
 
-long _typeNeuralArrayMultiply(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2)
+long typeNeuralArrayMultiply(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2)
 {
 	unsigned long   I;
 
@@ -298,7 +304,7 @@ long _typeNeuralArrayMultiply(typeNeuralArray* parent, typeNeuralArray* value1, 
 	return 1;
 }
 
-long _typeNeuralArrayDivide(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2)
+long typeNeuralArrayDivide(typeNeuralArray* parent, typeNeuralArray* value1, typeNeuralArray* value2)
 {
 	unsigned long   I;
 
@@ -320,7 +326,7 @@ long _typeNeuralArrayDivide(typeNeuralArray* parent, typeNeuralArray* value1, ty
 	return 1;
 }
 
-long _typeNeuralArrayGetMeanSquaredError(typeNeuralArray* parent, typeNeuralArray* target, typeNeuralUnit* result)
+long typeNeuralArrayGetMeanSquaredError(typeNeuralArray* parent, typeNeuralArray* target, typeNeuralUnit* result)
 {
 	unsigned long   I;
 	typeNeuralUnit  sum;
@@ -389,7 +395,7 @@ static void kernelArrayIndexMapCopy2D(
 	}
 }
 
-long _typeNeuralArrayIndexMapCopy2D(typeNeuralArray* parent, typeNeuralArray* source, typeIndexMap* indexmap)
+long typeNeuralArrayIndexMapCopy2D(typeNeuralArray* parent, typeNeuralArray* source, typeIndexMap* indexmap)
 {
 	unsigned long   I;
 	unsigned long   parentlength;
@@ -461,7 +467,7 @@ static void kernelArrayIndexMapPooling2DForward(
 	}
 }
 
-long _typeNeuralArrayIndexMapPooling2DForward(typeNeuralArray* parent, typeNeuralArray* source, typeIndexMap* indexmap)
+long typeNeuralArrayIndexMapPooling2DForward(typeNeuralArray* parent, typeNeuralArray* source, typeIndexMap* indexmap)
 {
 	unsigned long   I;
 	unsigned long   parentlength;
@@ -553,13 +559,13 @@ static void kernelArrayIndexMapPooling2DReverse(
 	}
 }
 
-long _typeNeuralArrayIndexMapPooling2DReverse(typeNeuralArray* parent, typeNeuralArray* source, typeNeuralArray* outputs, typeIndexMap* indexmap)
+long typeNeuralArrayIndexMapPooling2DReverse(typeNeuralArray* parent, typeNeuralArray* source, typeNeuralArray* outputs, typeIndexMap* indexmap)
 {
 	unsigned long   I;
 	unsigned long   parentlength;
 	unsigned long   sourcelength;
 
-	if ((parent == 0) || (source == 0) || (indexmap == 0))
+	if ((parent == 0) || (source == 0) || (outputs == 0) || (indexmap == 0))
 		return 0;
 
 	parentlength = (parent->arrayShape.shapeWidth * parent->arrayShape.shapeHeight);
@@ -625,7 +631,7 @@ static typeNeuralUnit kernelArrayIndexMapConvolution2DValue(
 	return sum;
 }
 
-long _typeNeuralArrayConvolution2DForward(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* filter, typeIndexMap* indexmap)
+long typeNeuralArrayConvolution2DForward(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* filter, typeIndexMap* indexmap)
 {
 	unsigned long   I, J, K;
 	unsigned long   resultlength;
@@ -680,7 +686,7 @@ long _typeNeuralArrayConvolution2DForward(typeNeuralArray* result, typeNeuralArr
 	return 1;
 }
 
-long _typeNeuralArrayConvolution2DReverse(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* filter, typeIndexMap* indexmap)
+long typeNeuralArrayConvolution2DReverse(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* filter, typeIndexMap* indexmap)
 {
 	unsigned long   I, J, K;
 	unsigned long   resultlength;
@@ -775,7 +781,7 @@ static void kernelArrayIndexMapConvolution2DAdd(
 	filter[filterindex + filteroffset] = sum;
 }
 
-long _typeNeuralArrayConvolution2DGetDerivatives(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* filter, typeIndexMap* indexmap)
+long typeNeuralArrayConvolution2DGetDerivatives(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* filter, typeIndexMap* indexmap)
 {
 	unsigned long   I, J, K;
 	unsigned long   resultlength;
@@ -829,7 +835,7 @@ long _typeNeuralArrayConvolution2DGetDerivatives(typeNeuralArray* result, typeNe
 	return 1;
 }
 
-long _typeNeuralArrayMatrixForward(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* weights)
+long typeNeuralArrayMatrixForward(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* weights)
 {
 	unsigned long   I, J, K;
 	typeNeuralUnit  sum;
@@ -855,7 +861,7 @@ long _typeNeuralArrayMatrixForward(typeNeuralArray* result, typeNeuralArray* sou
 	return 1;
 }
 
-long _typeNeuralArrayMatrixReverse(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* outputs, typeNeuralArray* weights)
+long typeNeuralArrayMatrixReverse(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* outputs, typeNeuralArray* weights)
 {
 	unsigned long   I, J, K;
 	typeNeuralUnit  sum;
@@ -883,7 +889,7 @@ long _typeNeuralArrayMatrixReverse(typeNeuralArray* result, typeNeuralArray* sou
 	return 1;
 }
 
-long _typeNeuralArrayMatrixGetDerivatives(typeNeuralArray* deltas, typeNeuralArray* outputs, typeNeuralArray* derivatives)
+long typeNeuralArrayMatrixGetDerivatives(typeNeuralArray* deltas, typeNeuralArray* outputs, typeNeuralArray* derivatives)
 {
 	unsigned long   I, J, K;
 
@@ -922,7 +928,7 @@ static typeNeuralUnit transferForward(typeNeuralUnit value, unsigned long transf
 	return 0;
 }
 
-long _typeNeuralArrayTransferForward(typeNeuralArray* result, typeNeuralArray* source, unsigned long transfer)
+long typeNeuralArrayTransferForward(typeNeuralArray* result, typeNeuralArray* source, unsigned long transfer)
 {
 	unsigned long   I;
 
@@ -955,14 +961,15 @@ static typeNeuralUnit transferReverse(typeNeuralUnit value, unsigned long transf
 	return 0;
 }
 
-long _typeNeuralArrayTransferReverse(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* outputs, unsigned long transfer)
+long typeNeuralArrayTransferReverse(typeNeuralArray* result, typeNeuralArray* source, typeNeuralArray* outputs, unsigned long transfer)
 {
 	unsigned long   I;
 
 	if ((result == 0) || (source == 0) || (outputs == 0))
 		return 0;
 
-	if (result->arrayLength != source->arrayLength)
+	if ((result->arrayLength != source->arrayLength) ||
+		(result->arrayLength != outputs->arrayLength))
 		return 0;
 
 	for (I = 0; I < result->arrayLength; I++)
@@ -973,7 +980,7 @@ long _typeNeuralArrayTransferReverse(typeNeuralArray* result, typeNeuralArray* s
 	return 1;
 }
 
-long _typeNeuralArrayUpdateMomentum(typeNeuralArray* weights, typeNeuralArray* vectors, typeNeuralArray* deltas, typeNeuralUnit learningrate, typeNeuralUnit momentum)
+long typeNeuralArrayUpdateMomentum(typeNeuralArray* weights, typeNeuralArray* vectors, typeNeuralArray* deltas, typeNeuralUnit learningrate, typeNeuralUnit momentum)
 {
 	unsigned long  I;
 
@@ -994,7 +1001,7 @@ long _typeNeuralArrayUpdateMomentum(typeNeuralArray* weights, typeNeuralArray* v
 	return 1;
 }
 
-long _typeNeuralArrayUpdateAdagrad(typeNeuralArray* weights, typeNeuralArray* vectors, typeNeuralArray* gammas, typeNeuralArray* deltas, typeNeuralUnit learningrate, typeNeuralUnit momentum)
+long typeNeuralArrayUpdateAdagrad(typeNeuralArray* weights, typeNeuralArray* vectors, typeNeuralArray* gammas, typeNeuralArray* deltas, typeNeuralUnit learningrate, typeNeuralUnit momentum)
 {
 	unsigned long  I;
 	typeNeuralUnit epsilon = 0.000000001;
@@ -1005,6 +1012,7 @@ long _typeNeuralArrayUpdateAdagrad(typeNeuralArray* weights, typeNeuralArray* ve
 		return 0;
 
 	if ((weights->arrayLength != vectors->arrayLength) ||
+		(weights->arrayLength != gammas->arrayLength) ||
 		(weights->arrayLength != deltas->arrayLength))
 		return 0;
 
@@ -1021,7 +1029,7 @@ long _typeNeuralArrayUpdateAdagrad(typeNeuralArray* weights, typeNeuralArray* ve
 	return 1;
 }
 
-long _typeNeuralArrayUpdateAdam(typeNeuralArray* weights, typeNeuralArray* vectors, typeNeuralArray* gammas, typeNeuralArray* deltas, typeNeuralUnit learningrate, typeNeuralUnit momentum)
+long typeNeuralArrayUpdateAdam(typeNeuralArray* weights, typeNeuralArray* vectors, typeNeuralArray* gammas, typeNeuralArray* deltas, typeNeuralUnit learningrate, typeNeuralUnit momentum)
 {
 	unsigned long  I;
 	typeNeuralUnit epsilon = 0.000000001;
@@ -1052,7 +1060,7 @@ long _typeNeuralArrayUpdateAdam(typeNeuralArray* weights, typeNeuralArray* vecto
 	return 1;
 }
 
-long _typeNeuralArrayDestroy(typeNeuralArray* parent)
+long typeNeuralArrayDestroy(typeNeuralArray* parent)
 {
 	if (parent == 0)
 		return 0;
@@ -1064,37 +1072,6 @@ long _typeNeuralArrayDestroy(typeNeuralArray* parent)
 	parent->arrayData = 0;
 
 	return 1;
-}
-
-void initNeuralLibrary()
-{
-	typeNeuralArrayCreate = _typeNeuralArrayCreate;
-	typeNeuralArraySetImageRGB = _typeNeuralArraySetImageRGB;
-	typeNeuralArrayGetImageRGB = _typeNeuralArrayGetImageRGB;
-	typeNeuralArrayCopy = _typeNeuralArrayCopy;
-	typeNeuralArrayFillZero = _typeNeuralArrayFillZero;
-	typeNeuralArrayFillOnes = _typeNeuralArrayFillOnes;
-	typeNeuralArrayFillRandom = _typeNeuralArrayFillRandom;
-	typeNeuralArrayAdd = _typeNeuralArrayAdd;
-	typeNeuralArraySubtract = _typeNeuralArraySubtract;
-	typeNeuralArrayMultiply = _typeNeuralArrayMultiply;
-	typeNeuralArrayDivide = _typeNeuralArrayDivide;
-	typeNeuralArrayGetMeanSquaredError = _typeNeuralArrayGetMeanSquaredError;
-	typeNeuralArrayIndexMapCopy2D = _typeNeuralArrayIndexMapCopy2D;
-	typeNeuralArrayIndexMapPooling2DForward = _typeNeuralArrayIndexMapPooling2DForward;
-	typeNeuralArrayIndexMapPooling2DReverse = _typeNeuralArrayIndexMapPooling2DReverse;
-	typeNeuralArrayConvolution2DForward = _typeNeuralArrayConvolution2DForward;
-	typeNeuralArrayConvolution2DReverse = _typeNeuralArrayConvolution2DReverse;
-	typeNeuralArrayConvolution2DGetDerivatives = _typeNeuralArrayConvolution2DGetDerivatives;
-	typeNeuralArrayMatrixForward = _typeNeuralArrayMatrixForward;
-	typeNeuralArrayMatrixReverse = _typeNeuralArrayMatrixReverse;
-	typeNeuralArrayMatrixGetDerivatives = _typeNeuralArrayMatrixGetDerivatives;
-	typeNeuralArrayTransferForward = _typeNeuralArrayTransferForward;
-	typeNeuralArrayTransferReverse = _typeNeuralArrayTransferReverse;
-	typeNeuralArrayUpdateMomentum = _typeNeuralArrayUpdateMomentum;
-	typeNeuralArrayUpdateAdagrad = _typeNeuralArrayUpdateAdagrad;
-	typeNeuralArrayUpdateAdam = _typeNeuralArrayUpdateAdam;
-	typeNeuralArrayDestroy = _typeNeuralArrayDestroy;
 }
 
 #endif // TYPENEURALARRAY_H

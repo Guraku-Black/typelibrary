@@ -7,8 +7,10 @@ long typeNeuralLayerScalingCreate(typeNeuralLayer* parent,
 	unsigned long sourcewidth, unsigned long sourceheight, unsigned long sourcedepth,
 	unsigned long resultwidth, unsigned long resultheight, unsigned long resultdepth)
 {
-	typeShape   result;
-	typeShape   source;
+	typeShape    result;
+	typeShape    source;
+	typeIndexMap indexmap1;
+	typeIndexMap indexmap2;
 
 	if (typeNeuralLayerCreate(parent, sourcewidth, sourceheight, sourcedepth))
 	{
@@ -17,8 +19,14 @@ long typeNeuralLayerScalingCreate(typeNeuralLayer* parent,
 		typeShapeAssign(&source, sourcewidth, sourceheight, 1);
 		typeShapeAssign(&result, resultwidth, resultheight, 1);
 
-		typeIndexMapCreateScale2D(&parent->layerMap1, &result, &source);
-		typeIndexMapCreateScale2D(&parent->layerMap2, &source, &result);
+		typeIndexMapCreateScale2D(&indexmap1, &result, &source);
+		typeIndexMapCreateScale2D(&indexmap2, &source, &result);
+
+		cudaIndexMapCreateCopy(&parent->layerMap1, indexmap1.indexWidth, indexmap1.indexHeight, indexmap1.indexData);
+		cudaIndexMapCreateCopy(&parent->layerMap2, indexmap2.indexWidth, indexmap2.indexHeight, indexmap2.indexData);
+
+		typeIndexMapDestroy(&indexmap1);
+		typeIndexMapDestroy(&indexmap2);
 
 		return 1;
 	}
@@ -30,7 +38,7 @@ long typeNeuralLayerScalingFeedForward(typeNeuralLayer* parent, typeNeuralLayer*
 	if (parent == 0)
 		return 0;
 
-	return typeNeuralArrayIndexMapCopy2D(&next->layerOutputs, &parent->layerOutputs, &parent->layerMap1);
+	return cudaNeuralArrayIndexMap2DCopy(&next->layerOutputs, &parent->layerOutputs, &parent->layerMap1);
 }
 
 long typeNeuralLayerScalingBackPropagate(typeNeuralLayer* parent, typeNeuralLayer* next)
@@ -38,7 +46,7 @@ long typeNeuralLayerScalingBackPropagate(typeNeuralLayer* parent, typeNeuralLaye
 	if (parent == 0)
 		return 0;
 
-	return typeNeuralArrayIndexMapCopy2D(&parent->layerDeltas, &next->layerDeltas, &parent->layerMap2);
+	return cudaNeuralArrayIndexMap2DCopy(&parent->layerDeltas, &next->layerDeltas, &parent->layerMap2);
 }
 
 
@@ -47,12 +55,10 @@ long typeNeuralLayerScalingDestroy(typeNeuralLayer* parent)
 	if (parent == 0)
 		return 0;
 
-	typeIndexMapDestroy(&parent->layerMap1);
-	typeIndexMapDestroy(&parent->layerMap2);
+	cudaIndexMapDestroy(&parent->layerMap1);
+	cudaIndexMapDestroy(&parent->layerMap2);
 
 	return typeNeuralLayerDestroy(parent);
 }
-
-
 
 #endif // TYPENEURALLAYERSCALING_H

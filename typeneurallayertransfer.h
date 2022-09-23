@@ -20,7 +20,7 @@ long typeNeuralLayerTransferFeedForward(typeNeuralLayer* parent, typeNeuralLayer
 	if (parent == 0)
 		return 0;
 
-	return typeNeuralArrayTransferForward(&next->layerOutputs, &parent->layerOutputs, parent->layerValue1);
+	return cudaNeuralArrayTransferForward(&next->layerOutputs, &parent->layerOutputs, parent->layerValue1);
 }
 
 long typeNeuralLayerTransferBackPropagate(typeNeuralLayer* parent, typeNeuralLayer* next)
@@ -28,7 +28,7 @@ long typeNeuralLayerTransferBackPropagate(typeNeuralLayer* parent, typeNeuralLay
 	if (parent == 0)
 		return 0;
 
-	return typeNeuralArrayTransferReverse(&next->layerDeltas, &parent->layerDeltas, &parent->layerOutputs, parent->layerValue1);
+	return cudaNeuralArrayTransferReverse(&next->layerDeltas, &parent->layerDeltas, &parent->layerOutputs, parent->layerValue1);
 }
 
 long typeNeuralLayerTransferDestroy(typeNeuralLayer* parent)
