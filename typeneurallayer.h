@@ -11,13 +11,22 @@ enum layerType
 	TYPE_NEURAL_LAYER_SCALING,
 	TYPE_NEURAL_LAYER_POOLING,
 	TYPE_NEURAL_LAYER_CONVOLUTION,
-	TYPE_NEURAL_LAYER_TRANSFER
+	TYPE_NEURAL_LAYER_TRANSFER,
+	TYPE_NEURAL_LAYER_FOCUS
+};
+
+enum optimizerType
+{
+	TYPE_OPTIMIZER_MOMENTUM,
+	TYPE_OPTIMIZER_ADAGRAD,
+	TYPE_OPTIMIZER_ADAM
 };
 
 typedef struct
 {
 	unsigned long     layerType;
-	unsigned long     layerValue1;
+	cudaNeuralUnit    layerValue1;
+	cudaNeuralUnit    layerValue2;
 	cudaIndexMap      layerMap1;
 	cudaIndexMap      layerMap2;
 	cudaNeuralArray   layerOutputs;

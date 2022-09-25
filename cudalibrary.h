@@ -86,7 +86,10 @@ extern "C"
 	DLLEXPORT long cudaNeuralArrayGetImageRGB(cudaNeuralArray* parent, unsigned long imagewidth, unsigned long imageheight, unsigned long* imagedata);
 	DLLEXPORT long cudaNeuralArrayFillZero(cudaNeuralArray* result);
 	DLLEXPORT long cudaNeuralArrayFillOnes(cudaNeuralArray* result);
-	DLLEXPORT long cudaNeuralArrayFillRandom(cudaNeuralArray* result);
+	DLLEXPORT long cudaNeuralArrayFillRandomUniform(cudaNeuralArray* result);
+	DLLEXPORT long cudaNeuralArrayFillRandomNormal(cudaNeuralArray* result);
+	DLLEXPORT long cudaNeuralArrayFillRandomXavier(cudaNeuralArray* result, unsigned long fanIn, unsigned long fanOut);
+	DLLEXPORT long cudaNeuralArrayFillOneHot(cudaNeuralArray* result, unsigned long index);
 	DLLEXPORT long cudaNeuralArrayAdd(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralArray* value2);
 	DLLEXPORT long cudaNeuralArraySubtract(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralArray* value2);
 	DLLEXPORT long cudaNeuralArrayMultiply(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralArray* value2);
@@ -103,6 +106,7 @@ extern "C"
 	DLLEXPORT long cudaNeuralArrayMatrixGetDerivatives(cudaNeuralArray* result, cudaNeuralArray* source, cudaNeuralArray* weights);
 	DLLEXPORT long cudaNeuralArrayTransferForward(cudaNeuralArray* result, cudaNeuralArray* source, unsigned long transfer);
 	DLLEXPORT long cudaNeuralArrayTransferReverse(cudaNeuralArray* result, cudaNeuralArray* source, cudaNeuralArray* outputs, unsigned long transfer);
+	DLLEXPORT long cudaNeuralArrayTransferFocus(cudaNeuralArray* result, cudaNeuralArray* source, cudaNeuralArray* outputs, cudaNeuralArray* target, cudaNeuralUnit  lambda, cudaNeuralUnit range);
 	DLLEXPORT long cudaNeuralArrayUpdateMomentum(cudaNeuralArray* weights, cudaNeuralArray* vectors, cudaNeuralArray* deltas, cudaNeuralUnit learningrate, cudaNeuralUnit momentum);
 	DLLEXPORT long cudaNeuralArrayUpdateAdagrad(cudaNeuralArray* weights, cudaNeuralArray* vectors, cudaNeuralArray* gammas, cudaNeuralArray* deltas, cudaNeuralUnit learningrate, cudaNeuralUnit momentum);
 	DLLEXPORT long cudaNeuralArrayUpdateAdam(cudaNeuralArray* weights, cudaNeuralArray* vectors, cudaNeuralArray* gammas, cudaNeuralArray* deltas, cudaNeuralUnit learningrate, cudaNeuralUnit momentum);

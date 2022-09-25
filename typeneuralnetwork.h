@@ -10,9 +10,13 @@
 #include "typeneurallayerpooling.h"
 #include "typeneurallayerconvolution.h"
 #include "typeneurallayertransfer.h"
+#include "typeneurallayerfocus.h"
 
 typedef struct
 {
+	unsigned long    networkOptimizer;
+	cudaNeuralUnit   networkMomentum;
+	cudaNeuralUnit   networkLearningRate;
 	unsigned long    networkLength;
 	typeDynamicArray networkData;
 } typeNeuralNetwork;
@@ -23,6 +27,7 @@ long typeNeuralNetworkAddLayerBias(typeNeuralNetwork* parent, unsigned long widt
 long typeNeuralNetworkAddLayerScaling(typeNeuralNetwork* parent, unsigned long sourcewidth, unsigned long sourceheight, unsigned long sourcedepth, unsigned long resultwidth, unsigned long resultheight, unsigned long resultdepth);
 long typeNeuralNetworkAddLayerPooling(typeNeuralNetwork* parent, unsigned long sourcewidth, unsigned long sourceheight, unsigned long sourcedepth, unsigned long resultwidth, unsigned long resultheight, unsigned long resultdepth);
 long typeNeuralNetworkAddLayerTransfer(typeNeuralNetwork* parent, unsigned long width, unsigned height, unsigned long depth, unsigned long transfer);
+long typeNeuralNetworkAddLayerFocus(typeNeuralNetwork* parent, unsigned long width, unsigned height, unsigned long depth, cudaNeuralUnit lambda, cudaNeuralUnit range);
 long typeNeuralNetworkFeedForwardArray(typeNeuralNetwork* parent, cudaNeuralArray* source);
 long typeNeuralNetworkBackPropagateArray(typeNeuralNetwork* parent, cudaNeuralArray* target);
 long typeNeuralNetworkGetOutputs(typeNeuralNetwork* parent, cudaNeuralArray* result);
@@ -39,6 +44,9 @@ long typeNeuralNetworkCreate(typeNeuralNetwork* parent)
 
 	if (typeDynamicArrayCreate(&parent->networkData, neuralnetwork_page))
 	{
+		parent->networkOptimizer = TYPE_OPTIMIZER_MOMENTUM;
+		parent->networkMomentum  = 0.09;
+		parent->networkLearningRate = 0.001;
 		parent->networkLength = 0;
 
 		return 1;
@@ -154,6 +162,18 @@ long typeNeuralNetworkAddLayerTransfer(typeNeuralNetwork* parent, unsigned long 
 	return typeNeuralLayerTransferCreate(layers, width, height, depth, transfer);
 }
 
+long typeNeuralNetworkAddLayerFocus(typeNeuralNetwork* parent, unsigned long width, unsigned height, unsigned long depth, cudaNeuralUnit lambda, cudaNeuralUnit range)
+{
+	typeNeuralLayer* layers;
+
+	if (parent == 0)
+		return 0;
+
+	layers = typeNeuralNetworkAddLayer(parent);
+
+	return typeNeuralLayerFocusCreate(layers, width, height, depth, lambda, range);
+}
+
 
 long typeNeuralNetworkFeedForwardArray(typeNeuralNetwork* parent, cudaNeuralArray* source)
 {
@@ -250,6 +270,9 @@ long typeNeuralNetworkFeedForward(typeNeuralNetwork* parent)
 			case TYPE_NEURAL_LAYER_TRANSFER:
 				typeNeuralLayerTransferFeedForward(&layers[I], &layers[I + 1]);
 				break;
+			case TYPE_NEURAL_LAYER_FOCUS:
+				typeNeuralLayerFocusFeedForward(&layers[I], &layers[I + 1]);
+				break;
 			}
 		}
 	}
@@ -294,6 +317,9 @@ long typeNeuralNetworkBackPropagate(typeNeuralNetwork* parent)
 			case TYPE_NEURAL_LAYER_TRANSFER:
 				typeNeuralLayerTransferBackPropagate(&layers[I], &layers[I + 1]);
 				break;
+			case TYPE_NEURAL_LAYER_FOCUS:
+				typeNeuralLayerFocusBackPropagate(&layers[I], &layers[I + 1]);
+				break;
 			}
 		}
 	}
@@ -321,10 +347,10 @@ long typeNeuralNetworkUpdateWeights(typeNeuralNetwork* parent)
 			switch (layers[I].layerType)
 			{
 			case TYPE_NEURAL_LAYER_BIAS:
-				typeNeuralLayerBiasUpdateWeights(&layers[I], &layers[I + 1], 0.01, 0.9);
+				typeNeuralLayerBiasUpdateWeights(&layers[I], &layers[I + 1], parent->networkLearningRate, parent->networkMomentum, parent->networkOptimizer);
 				break;
 			case TYPE_NEURAL_LAYER_CONVOLUTION:
-				typeNeuralLayerConvolutionUpdateWeights(&layers[I], &layers[I + 1], 0.01, 0.9);
+				typeNeuralLayerConvolutionUpdateWeights(&layers[I], &layers[I + 1], parent->networkLearningRate, parent->networkMomentum, parent->networkOptimizer);
 				break;
 			}
 		}
@@ -366,6 +392,9 @@ long typeNeuralNetworkDestroy(typeNeuralNetwork* parent)
 				break;
 			case TYPE_NEURAL_LAYER_TRANSFER:
 				typeNeuralLayerTransferDestroy(&layers[I]);
+				break;
+			case TYPE_NEURAL_LAYER_FOCUS:
+				typeNeuralLayerFocusDestroy(&layers[I]);
 				break;
 			}
 		}

@@ -45,9 +45,20 @@ long typeNeuralLayerBiasBackPropagate(typeNeuralLayer* parent, typeNeuralLayer* 
 	return cudaNeuralArrayCopy(&parent->layerDeltas, &next->layerDeltas);
 }
 
-long typeNeuralLayerBiasUpdateWeights(typeNeuralLayer* parent, typeNeuralLayer* next, cudaNeuralUnit learningrate, cudaNeuralUnit momentum)
+long typeNeuralLayerBiasUpdateWeights(typeNeuralLayer* parent, typeNeuralLayer* next, cudaNeuralUnit learningrate, cudaNeuralUnit momentum, unsigned long optimizer)
 {
-	cudaNeuralArrayUpdateAdagrad(&parent->layerWeights, &parent->layerVectors, &parent->layerGammas, &parent->layerDeltas, learningrate, momentum);
+	switch (optimizer)
+	{
+	case TYPE_OPTIMIZER_MOMENTUM :
+		cudaNeuralArrayUpdateMomentum(&parent->layerWeights, &parent->layerVectors, &parent->layerDeltas, learningrate, momentum);
+		break;
+	case TYPE_OPTIMIZER_ADAGRAD :
+		cudaNeuralArrayUpdateAdagrad(&parent->layerWeights, &parent->layerVectors, &parent->layerGammas, &parent->layerDeltas, learningrate, momentum);
+		break;
+	case TYPE_OPTIMIZER_ADAM :
+		cudaNeuralArrayUpdateAdam(&parent->layerWeights, &parent->layerVectors, &parent->layerGammas, &parent->layerDeltas, learningrate, momentum);
+		break;
+	}
 
 	return 1;
 }
@@ -59,6 +70,7 @@ long typeNeuralLayerBiasDestroy(typeNeuralLayer* parent)
 
 	cudaNeuralArrayDestroy(&parent->layerWeights);
 	cudaNeuralArrayDestroy(&parent->layerVectors);
+	cudaNeuralArrayDestroy(&parent->layerGammas);
 
 	return typeNeuralLayerDestroy(parent);
 }

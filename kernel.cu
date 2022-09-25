@@ -447,7 +447,7 @@ long cudaNeuralArrayFillOnes(cudaNeuralArray* result)
 #include <curand_kernel.h>
 #include <time.h>
 
-__global__ void kernelFillRandom(cudaNeuralUnit* result, unsigned long seed, unsigned long length)
+__global__ void kernelFillRandomUniform(cudaNeuralUnit* result, unsigned long seed, unsigned long length)
 {
 	curandState    state;
 	unsigned long  I;
@@ -460,12 +460,92 @@ __global__ void kernelFillRandom(cudaNeuralUnit* result, unsigned long seed, uns
 	}
 }
 
-long cudaNeuralArrayFillRandom(cudaNeuralArray* result)
+long cudaNeuralArrayFillRandomUniform(cudaNeuralArray* result)
 {
 	if (result == 0)
 		return 0;
 
-	kernelFillRandom << < 1, 1 >> > (result->arrayData, clock(), result->arrayLength);
+	kernelFillRandomUniform << < 1, 1 >> > (result->arrayData, clock(), result->arrayLength);
+
+	return cudaMemoryDeviceSynchronize();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelFillRandomNormal(cudaNeuralUnit* result, unsigned long seed, unsigned long length)
+{
+	curandState    state;
+	unsigned long  I;
+
+	curand_init(seed, 0, 0, &state);
+
+	for (I = 0; I < length; I++)
+	{
+		result[I] = curand_normal(&state);
+	}
+}
+
+long cudaNeuralArrayFillRandomNormal(cudaNeuralArray* result)
+{
+	if (result == 0)
+		return 0;
+
+	kernelFillRandomNormal << < 1, 1 >> > (result->arrayData, clock(), result->arrayLength);
+
+	return cudaMemoryDeviceSynchronize();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelFillRandomXavier(cudaNeuralUnit* result, unsigned long seed, unsigned long fanIn, unsigned long fanOut, unsigned long length)
+{
+	curandState    state;
+	cudaNeuralUnit value;
+	cudaNeuralUnit avg;
+	unsigned long  I;
+
+	curand_init(seed, 0, 0, &state);
+
+	for (I = 0; I < length; I++)
+	{
+	    value = curand_normal(&state);
+
+		avg = ((double)fanIn + fanOut) / 2;
+		result[I] = value * (1.0 / sqrt(avg)); //  XAVIER
+		//result[I] = value * (2.0 / sqrt((double)fanIn)); //  HE
+		//result[I] = value * (1.0 / sqrt((double)fanIn)); //  LeCun 
+
+	}
+}
+
+long cudaNeuralArrayFillRandomXavier(cudaNeuralArray* result, unsigned long fanIn, unsigned long fanOut)
+{
+	if (result == 0)
+		return 0;
+
+	kernelFillRandomXavier << < 1, 1 >> > (result->arrayData, clock(), fanIn, fanOut, result->arrayLength);
+
+	return cudaMemoryDeviceSynchronize();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelFillOneHot(cudaNeuralUnit* result, unsigned long index, unsigned long length)
+{
+	unsigned long  I;
+
+	for (I = 0; I < length; I++)
+	{
+		if (I == index)
+			result[I] = 1;
+		else
+			result[I] = 0;
+	}
+}
+
+long cudaNeuralArrayFillOneHot(cudaNeuralArray* result, unsigned long index)
+{
+	if (result == 0)
+		return 0;
+
+	kernelFillOneHot << < 1, 1 >> > (result->arrayData, index, result->arrayLength);
 
 	return cudaMemoryDeviceSynchronize();
 }
@@ -997,6 +1077,19 @@ __global__ void kernelArrayIndexMap2DConvolutionForward(
 		filterindex += filterlength;
 	}
 
+	if ((sum < -3) || (sum > 3))
+	{
+		sum = 0;
+		filterindex = (J * sourcecount) * filterlength;
+		for (I = 0; I < sourcecount; I++)
+		{
+			for (J = 0; J < filterlength; J++)
+				filter[filterindex + J] *= 0.9;
+
+			filterindex += filterlength;
+		}
+	}
+
 	result[resultindex + K] = sum;
 }
 
@@ -1472,6 +1565,46 @@ long cudaNeuralArrayTransferReverse(cudaNeuralArray* result, cudaNeuralArray* so
 }
 
 //////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArrayTransferFocus(
+	cudaNeuralUnit* result, 
+	cudaNeuralUnit* source, 
+	cudaNeuralUnit* outputs, 
+	cudaNeuralUnit* target, 
+	cudaNeuralUnit  lambda, 
+	cudaNeuralUnit  range, 
+	unsigned long length)
+{
+	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
+
+	if (I >= length)
+		return;
+
+	cudaNeuralUnit   gap, grad;
+
+	gap = (target[I] - outputs[I]);
+	grad = (gap / range) * (gap / range);
+	source[I] = result[I] + (grad * lambda) * gap;
+}
+
+long cudaNeuralArrayTransferFocus(cudaNeuralArray* result, cudaNeuralArray* source, cudaNeuralArray* outputs, cudaNeuralArray* target, cudaNeuralUnit lambda, cudaNeuralUnit range)
+{
+	if ((result == 0) || (source == 0) || (outputs == 0) || (target == 0))
+		return 0;
+
+	if ((result->arrayLength != source->arrayLength) ||
+		(result->arrayLength != outputs->arrayLength) ||
+		(result->arrayLength != target->arrayLength))
+		return 0;
+
+	dim3 threadsPerBlock(512);
+	dim3 blocksPerGrid((result->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
+
+	kernelArrayTransferFocus << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, source->arrayData, outputs->arrayData, target->arrayData, lambda, range, result->arrayLength);
+
+	return cudaMemoryDeviceSynchronize();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
 __global__ void kernelArrayUpdateMomentum(cudaNeuralUnit* weights, cudaNeuralUnit* vectors, cudaNeuralUnit* deltas, cudaNeuralUnit learningrate, cudaNeuralUnit momentum, unsigned long length)
 {
 	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
@@ -1479,9 +1612,9 @@ __global__ void kernelArrayUpdateMomentum(cudaNeuralUnit* weights, cudaNeuralUni
 	if (I >= length)
 		return;
 
-	vectors[I] = (vectors[I] * momentum) + (1 - momentum) * (learningrate * deltas[I]);
+	vectors[I] = (vectors[I] * momentum) + (1 - momentum) * (deltas[I]);
 
-	weights[I] = weights[I] + vectors[I];
+	weights[I] = weights[I] + learningrate * vectors[I];
 }
 
 long cudaNeuralArrayUpdateMomentum(cudaNeuralArray* weights, cudaNeuralArray* vectors, cudaNeuralArray* deltas, cudaNeuralUnit learningrate, cudaNeuralUnit momentum)
@@ -1516,9 +1649,9 @@ __global__ void kernelArrayUpdateAdagrad(cudaNeuralUnit* weights, cudaNeuralUnit
 	gammas[I] = (gammas[I] * m2) + (1 - m2) * (deltas[I] * deltas[I]);
 	grad = (learningrate / (sqrt(gammas[I]) + epsilon));
 
-	vectors[I] = (vectors[I] * momentum) + (1 - momentum) * (grad * deltas[I]);
+	vectors[I] = (vectors[I] * momentum) + (1 - momentum) * (deltas[I]);
 
-	weights[I] = weights[I] + vectors[I];
+	weights[I] = weights[I] + grad * vectors[I];
 }
 
 long cudaNeuralArrayUpdateAdagrad(cudaNeuralArray* weights, cudaNeuralArray* vectors, cudaNeuralArray* gammas, cudaNeuralArray* deltas, cudaNeuralUnit learningrate, cudaNeuralUnit momentum)

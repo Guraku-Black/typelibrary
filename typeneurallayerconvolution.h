@@ -25,7 +25,8 @@ long typeNeuralLayerConvolutionCreate(typeNeuralLayer* parent,
 		cudaNeuralArrayCreate(&parent->layerAlphas, filterwidth, filterheight, filtercount);
 		cudaNeuralArrayCreate(&parent->layerGammas, filterwidth, filterheight, filtercount);
 
-		cudaNeuralArrayFillRandom(&parent->layerWeights);
+		//cudaNeuralArrayFillRandomXavier(&parent->layerWeights, sourcewidth*sourceheight*sourcedepth, resultwidth*resultheight*resultdepth);
+		cudaNeuralArrayFillRandomUniform(&parent->layerWeights);
 		cudaNeuralArrayFillZero(&parent->layerVectors);
 		cudaNeuralArrayFillZero(&parent->layerGammas);
 
@@ -62,13 +63,22 @@ long typeNeuralLayerConvolutionBackPropagate(typeNeuralLayer* parent, typeNeural
 	return cudaNeuralArrayIndexMap2DConvolutionReverse(&next->layerDeltas, &parent->layerDeltas, &parent->layerWeights, &parent->layerMap2);
 }
 
-long typeNeuralLayerConvolutionUpdateWeights(typeNeuralLayer* parent, typeNeuralLayer* next, cudaNeuralUnit learningrate, cudaNeuralUnit momentum)
+long typeNeuralLayerConvolutionUpdateWeights(typeNeuralLayer* parent, typeNeuralLayer* next, cudaNeuralUnit learningrate, cudaNeuralUnit momentum, unsigned long optimizer)
 {
 	cudaNeuralArrayIndexMap2DConvolutionGetDerivatives(&next->layerDeltas, &parent->layerOutputs, &parent->layerAlphas, &parent->layerMap1);
 
-	//cudaNeuralArrayUpdateMomentum(&parent->layerWeights, &parent->layerVectors, &parent->layerAlphas, learningrate, momentum);
-	//cudaNeuralArrayUpdateAdagrad(&parent->layerWeights, &parent->layerVectors, &parent->layerGammas, &parent->layerAlphas, learningrate, momentum);
-	cudaNeuralArrayUpdateAdam(&parent->layerWeights, &parent->layerVectors, &parent->layerGammas, &parent->layerAlphas, learningrate, momentum);
+	switch (optimizer)
+	{
+	case TYPE_OPTIMIZER_MOMENTUM:
+		cudaNeuralArrayUpdateMomentum(&parent->layerWeights, &parent->layerVectors, &parent->layerAlphas, learningrate, momentum);
+		break;
+	case TYPE_OPTIMIZER_ADAGRAD:
+		cudaNeuralArrayUpdateAdagrad(&parent->layerWeights, &parent->layerVectors, &parent->layerGammas, &parent->layerAlphas, learningrate, momentum);
+		break;
+	case TYPE_OPTIMIZER_ADAM:
+		cudaNeuralArrayUpdateAdam(&parent->layerWeights, &parent->layerVectors, &parent->layerGammas, &parent->layerAlphas, learningrate, momentum);
+		break;
+	}
 
 	return 1;
 }
