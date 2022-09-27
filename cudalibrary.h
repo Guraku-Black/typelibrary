@@ -94,6 +94,10 @@ extern "C"
 	DLLEXPORT long cudaNeuralArraySubtract(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralArray* value2);
 	DLLEXPORT long cudaNeuralArrayMultiply(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralArray* value2);
 	DLLEXPORT long cudaNeuralArrayDivide(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralArray* value2);
+	DLLEXPORT long cudaNeuralArrayFlip3D(cudaNeuralArray* result, cudaNeuralArray* source, long A, long B, long C);
+	DLLEXPORT long cudaNeuralArrayShift3D(cudaNeuralArray* result, cudaNeuralArray* source, long A, long B, long C);
+	DLLEXPORT long cudaNeuralArrayZoom3D(cudaNeuralArray* result, cudaNeuralArray* source, double A, double B, double C);
+	DLLEXPORT long cudaNeuralArrayRotate2D(cudaNeuralArray* result, cudaNeuralArray* source, double angle);
 	DLLEXPORT long cudaNeuralArrayGetMeanSquaredError(cudaNeuralArray* source, cudaNeuralArray* target, cudaNeuralUnit* result);
 	DLLEXPORT long cudaNeuralArrayIndexMap2DCopy(cudaNeuralArray* result, cudaNeuralArray* source, cudaIndexMap* indexmap);
 	DLLEXPORT long cudaNeuralArrayIndexMap2DPoolingForward(cudaNeuralArray* result, cudaNeuralArray* source, cudaIndexMap* indexmap);

@@ -666,6 +666,268 @@ long cudaNeuralArrayDivide(cudaNeuralArray* result, cudaNeuralArray* value1, cud
 }
 
 //////////////////////////////////////////////////////////////////////////////////
+__device__ unsigned long deviceShapeGetIndex(long X, long Y, long Z, unsigned long width, unsigned long height, unsigned long depth)
+{
+	if ((X < 0) || (X >= (long)width) ||
+		(Y < 0) || (Y >= (long)height) ||
+		(Z < 0) || (Z >= (long)depth))
+		return CUDA_INVALID_INDEX;
+
+	return ((width * height) * Z) + (Y * width + X);
+}
+
+__global__ void kernelArrayFlip3D(cudaNeuralUnit* result, cudaNeuralUnit* source, long A, long B, long C, unsigned long width, unsigned long height, unsigned long depth)
+{
+	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
+	unsigned long  J = blockDim.y * blockIdx.y + threadIdx.y;
+	unsigned long  K = blockDim.z * blockIdx.z + threadIdx.z;
+	unsigned long  resultindex;
+	unsigned long  sourceindex;
+	long		   X, Y, Z;
+
+	if (I >= width)
+		return;
+	if (J >= height)
+		return;
+	if (K >= depth)
+		return;
+
+	resultindex = deviceShapeGetIndex(I, J, K, width, height, depth);
+
+	X = A ? (width - I - 1) : I;
+	Y = B ? (height - J - 1) : J;
+	Z = C ? (depth - K - 1) : K;
+
+	sourceindex = deviceShapeGetIndex(X, Y, Z, width, height, depth);
+
+	if (sourceindex != CUDA_INVALID_INDEX)
+		result[resultindex] = source[sourceindex];
+	else
+		result[resultindex] = 0;
+}
+
+long cudaNeuralArrayFlip3D(cudaNeuralArray* result, cudaNeuralArray* source, long A, long B, long C)
+{
+	if ((result == 0) || (source == 0))
+		return 0;
+
+	if (cudaShapeCompare(&result->arrayShape, &source->arrayShape) == 0)
+		return 0;
+
+	dim3 threadsPerBlock(8, 8, 8);
+	dim3 blocksPerGrid(
+		    (result->arrayShape.shapeWidth + threadsPerBlock.x - 1) / threadsPerBlock.x,
+		    (result->arrayShape.shapeHeight + threadsPerBlock.y - 1) / threadsPerBlock.y,
+			(result->arrayShape.shapeDepth + threadsPerBlock.z - 1) / threadsPerBlock.z);
+
+	kernelArrayFlip3D << < blocksPerGrid, threadsPerBlock >> >(
+		result->arrayData,
+		source->arrayData, 
+		A, B, C,
+		result->arrayShape.shapeWidth,
+		result->arrayShape.shapeHeight,
+		result->arrayShape.shapeDepth);
+
+		return cudaMemoryDeviceSynchronize();				
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArrayShift3D(cudaNeuralUnit* result, cudaNeuralUnit* source, long A, long B, long C, unsigned long width, unsigned long height, unsigned long depth)
+{
+	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
+	unsigned long  J = blockDim.y * blockIdx.y + threadIdx.y;
+	unsigned long  K = blockDim.z * blockIdx.z + threadIdx.z;
+	unsigned long  resultindex;
+	unsigned long  sourceindex;
+	long		   X, Y, Z;
+
+	if (I >= width)
+		return;
+	if (J >= height)
+		return;
+	if (K >= depth)
+		return;
+
+	resultindex = deviceShapeGetIndex(I, J, K, width, height, depth);
+
+	X = (long)I + A;
+	Y = (long)J + B;
+	Z = (long)K + C;
+
+	sourceindex = deviceShapeGetIndex(X, Y, Z, width, height, depth);
+
+	if (sourceindex != CUDA_INVALID_INDEX)
+		result[resultindex] = source[sourceindex];
+	else
+		result[resultindex] = 0;
+}
+
+long cudaNeuralArrayShift3D(cudaNeuralArray* result, cudaNeuralArray* source, long A, long B, long C)
+{
+	if ((result == 0) || (source == 0))
+		return 0;
+
+	if (cudaShapeCompare(&result->arrayShape, &source->arrayShape) == 0)
+		return 0;
+
+	dim3 threadsPerBlock(8, 8, 8);
+	dim3 blocksPerGrid(
+		(result->arrayShape.shapeWidth + threadsPerBlock.x - 1) / threadsPerBlock.x,
+		(result->arrayShape.shapeHeight + threadsPerBlock.y - 1) / threadsPerBlock.y,
+		(result->arrayShape.shapeDepth + threadsPerBlock.z - 1) / threadsPerBlock.z);
+
+	kernelArrayShift3D << < blocksPerGrid, threadsPerBlock >> > (
+		result->arrayData,
+		source->arrayData,
+		A, B, C,
+		result->arrayShape.shapeWidth,
+		result->arrayShape.shapeHeight,
+		result->arrayShape.shapeDepth);
+
+	return cudaMemoryDeviceSynchronize();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArrayZoom3D(cudaNeuralUnit* result, cudaNeuralUnit* source, double A, double B, double C, unsigned long width, unsigned long height, unsigned long depth)
+{
+	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
+	unsigned long  J = blockDim.y * blockIdx.y + threadIdx.y;
+	unsigned long  K = blockDim.z * blockIdx.z + threadIdx.z;
+	unsigned long  resultindex;
+	unsigned long  sourceindex;
+	long		   X, Y, Z;
+	double         XC, YC, ZC;
+
+	if (I >= width)
+		return;
+	if (J >= height)
+		return;
+	if (K >= depth)
+		return;
+
+	XC = (double)width / 2;
+	YC = (double)height / 2;
+	ZC = (double)depth / 2;
+
+	resultindex = deviceShapeGetIndex(I, J, K, width, height, depth);
+
+	X = (long)((I - XC) * A + XC);
+	Y = (long)((J - YC) * B + YC);
+	Z = (long)((K - ZC) * C + ZC);
+
+	sourceindex = deviceShapeGetIndex(X, Y, Z, width, height, depth);
+
+	if (sourceindex != CUDA_INVALID_INDEX)
+		result[resultindex] = source[sourceindex];
+	else
+		result[resultindex] = 0;
+}
+
+long cudaNeuralArrayZoom3D(cudaNeuralArray* result, cudaNeuralArray* source, double A, double B, double C)
+{
+	if ((result == 0) || (source == 0))
+		return 0;
+
+	if (cudaShapeCompare(&result->arrayShape, &source->arrayShape) == 0)
+		return 0;
+
+	dim3 threadsPerBlock(8, 8, 8);
+	dim3 blocksPerGrid(
+		(result->arrayShape.shapeWidth + threadsPerBlock.x - 1) / threadsPerBlock.x,
+		(result->arrayShape.shapeHeight + threadsPerBlock.y - 1) / threadsPerBlock.y,
+		(result->arrayShape.shapeDepth + threadsPerBlock.z - 1) / threadsPerBlock.z);
+
+	kernelArrayZoom3D << < blocksPerGrid, threadsPerBlock >> > (
+		result->arrayData,
+		source->arrayData,
+		A, B, C,
+		result->arrayShape.shapeWidth,
+		result->arrayShape.shapeHeight,
+		result->arrayShape.shapeDepth);
+
+	return cudaMemoryDeviceSynchronize();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__device__ const auto CUDA_PI = 3.141592653589793238462643383279502884197169399375105820974944;
+
+__device__ double cuda_sin(double a)
+{
+	return sin(a / 180.0 * CUDA_PI);
+}
+
+__device__ double cuda_cos(double a)
+{
+	return cos(a / 180.0 * CUDA_PI);
+}
+
+__global__ void kernelArrayRotate2D(cudaNeuralUnit* result, cudaNeuralUnit* source, double angle, unsigned long width, unsigned long height, unsigned long depth)
+{
+	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
+	unsigned long  J = blockDim.y * blockIdx.y + threadIdx.y;
+	unsigned long  K = blockDim.z * blockIdx.z + threadIdx.z;
+	unsigned long  resultindex;
+	unsigned long  sourceindex;
+	long           X, Y;
+	double         XC, YC;
+	double         XT, YT;
+	double         xsin, xcos;
+
+	if (I >= width)
+		return;
+	if (J >= height)
+		return;
+	if (K >= depth)
+		return;
+
+	XC = (double)width / 2;
+	YC = (double)height / 2;
+
+	xsin = cuda_sin(angle);
+	xcos = cuda_cos(angle);
+
+	resultindex = deviceShapeGetIndex(I, J, K, width, height, depth);
+
+	XT = I - XC;
+	YT = J - YC;
+
+	X = (long)((XT * xcos + YT * xsin) + XC);
+	Y = (long)((YT * xcos - XT * xsin) + YC);
+
+	sourceindex = deviceShapeGetIndex(X, Y, K, width, height, depth);
+
+	if (sourceindex != CUDA_INVALID_INDEX)
+		result[resultindex] = source[sourceindex];
+	else
+		result[resultindex] = 0;
+}
+
+long cudaNeuralArrayRotate2D(cudaNeuralArray* result, cudaNeuralArray* source, double angle)
+{
+	if ((result == 0) || (source == 0))
+		return 0;
+
+	if (cudaShapeCompare(&result->arrayShape, &source->arrayShape) == 0)
+		return 0;
+
+	dim3 threadsPerBlock(8, 8, 8);
+	dim3 blocksPerGrid(
+		(result->arrayShape.shapeWidth + threadsPerBlock.x - 1) / threadsPerBlock.x,
+		(result->arrayShape.shapeHeight + threadsPerBlock.y - 1) / threadsPerBlock.y,
+		(result->arrayShape.shapeDepth + threadsPerBlock.z - 1) / threadsPerBlock.z);
+
+	kernelArrayRotate2D << < blocksPerGrid, threadsPerBlock >> > (
+		result->arrayData,
+		source->arrayData,
+		angle,
+		result->arrayShape.shapeWidth,
+		result->arrayShape.shapeHeight,
+		result->arrayShape.shapeDepth);
+
+	return cudaMemoryDeviceSynchronize();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
 __managed__ cudaNeuralUnit     cudaRegister1;
 
 __global__ void kernelArrayGetMeanSquaredError(cudaNeuralUnit* source, cudaNeuralUnit* target, unsigned long length)
