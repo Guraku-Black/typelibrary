@@ -395,7 +395,7 @@ long cudaNeuralArrayGetImageRGB(cudaNeuralArray* parent, unsigned long imagewidt
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-__global__ void kernelFillZero(cudaNeuralUnit* result, unsigned long length)
+__global__ void kernelArrayFillZero(cudaNeuralUnit* result, unsigned long length)
 {
 	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -413,13 +413,13 @@ long cudaNeuralArrayFillZero(cudaNeuralArray* result)
 	dim3 threadsPerBlock(512);
 	dim3 blocksPerGrid((result->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
 
-	kernelFillZero << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, result->arrayLength);
+	kernelArrayFillZero << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, result->arrayLength);
 
 	return cudaMemoryDeviceSynchronize();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-__global__ void kernelFillOnes(cudaNeuralUnit* result, unsigned long length)
+__global__ void kernelArrayFillOnes(cudaNeuralUnit* result, unsigned long length)
 {
 	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -437,7 +437,7 @@ long cudaNeuralArrayFillOnes(cudaNeuralArray* result)
 	dim3 threadsPerBlock(512);
 	dim3 blocksPerGrid((result->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
 
-	kernelFillOnes << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, result->arrayLength);
+	kernelArrayFillOnes << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, result->arrayLength);
 
 	return cudaMemoryDeviceSynchronize();
 }
@@ -447,7 +447,7 @@ long cudaNeuralArrayFillOnes(cudaNeuralArray* result)
 #include <curand_kernel.h>
 #include <time.h>
 
-__global__ void kernelFillRandomUniform(cudaNeuralUnit* result, unsigned long seed, unsigned long length)
+__global__ void kernelArrayFillRandomUniform(cudaNeuralUnit* result, unsigned long seed, unsigned long length)
 {
 	curandState    state;
 	unsigned long  I;
@@ -465,13 +465,13 @@ long cudaNeuralArrayFillRandomUniform(cudaNeuralArray* result)
 	if (result == 0)
 		return 0;
 
-	kernelFillRandomUniform << < 1, 1 >> > (result->arrayData, clock(), result->arrayLength);
+	kernelArrayFillRandomUniform << < 1, 1 >> > (result->arrayData, clock(), result->arrayLength);
 
 	return cudaMemoryDeviceSynchronize();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-__global__ void kernelFillRandomNormal(cudaNeuralUnit* result, unsigned long seed, unsigned long length)
+__global__ void kernelArrayFillRandomNormal(cudaNeuralUnit* result, unsigned long seed, unsigned long length)
 {
 	curandState    state;
 	unsigned long  I;
@@ -489,13 +489,13 @@ long cudaNeuralArrayFillRandomNormal(cudaNeuralArray* result)
 	if (result == 0)
 		return 0;
 
-	kernelFillRandomNormal << < 1, 1 >> > (result->arrayData, clock(), result->arrayLength);
+	kernelArrayFillRandomNormal << < 1, 1 >> > (result->arrayData, clock(), result->arrayLength);
 
 	return cudaMemoryDeviceSynchronize();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-__global__ void kernelFillRandomXavier(cudaNeuralUnit* result, unsigned long seed, unsigned long fanIn, unsigned long fanOut, unsigned long length)
+__global__ void kernelArrayFillRandomXavier(cudaNeuralUnit* result, unsigned long seed, unsigned long fanIn, unsigned long fanOut, unsigned long length)
 {
 	curandState    state;
 	cudaNeuralUnit value;
@@ -506,7 +506,7 @@ __global__ void kernelFillRandomXavier(cudaNeuralUnit* result, unsigned long see
 
 	for (I = 0; I < length; I++)
 	{
-	    value = curand_normal(&state);
+		value = curand_normal(&state);
 
 		avg = ((double)fanIn + fanOut) / 2;
 		result[I] = value * (1.0 / sqrt(avg)); //  XAVIER
@@ -521,13 +521,13 @@ long cudaNeuralArrayFillRandomXavier(cudaNeuralArray* result, unsigned long fanI
 	if (result == 0)
 		return 0;
 
-	kernelFillRandomXavier << < 1, 1 >> > (result->arrayData, clock(), fanIn, fanOut, result->arrayLength);
+	kernelArrayFillRandomXavier << < 1, 1 >> > (result->arrayData, clock(), fanIn, fanOut, result->arrayLength);
 
 	return cudaMemoryDeviceSynchronize();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-__global__ void kernelFillOneHot(cudaNeuralUnit* result, unsigned long index, unsigned long length)
+__global__ void kernelArrayFillOneHot(cudaNeuralUnit* result, unsigned long index, unsigned long length)
 {
 	unsigned long  I;
 
@@ -545,13 +545,13 @@ long cudaNeuralArrayFillOneHot(cudaNeuralArray* result, unsigned long index)
 	if (result == 0)
 		return 0;
 
-	kernelFillOneHot << < 1, 1 >> > (result->arrayData, index, result->arrayLength);
+	kernelArrayFillOneHot << < 1, 1 >> > (result->arrayData, index, result->arrayLength);
 
 	return cudaMemoryDeviceSynchronize();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-__global__ void kernelAdd(cudaNeuralUnit* result, cudaNeuralUnit* value1, cudaNeuralUnit* value2, unsigned long length)
+__global__ void kernelArrayAdd(cudaNeuralUnit* result, cudaNeuralUnit* value1, cudaNeuralUnit* value2, unsigned long length)
 {
 	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -573,13 +573,40 @@ long cudaNeuralArrayAdd(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNe
 	dim3 threadsPerBlock(512);
 	dim3 blocksPerGrid((result->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
 
-	kernelAdd << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, value1->arrayData, value2->arrayData, result->arrayLength);
+	kernelArrayAdd << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, value1->arrayData, value2->arrayData, result->arrayLength);
 
 	return cudaMemoryDeviceSynchronize();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-__global__ void kernelSubtract(cudaNeuralUnit* result, cudaNeuralUnit* value1, cudaNeuralUnit* value2, unsigned long length)
+__global__ void kernelArrayAddValue(cudaNeuralUnit* result, cudaNeuralUnit* value1, cudaNeuralUnit value2, unsigned long length)
+{
+	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
+
+	if (I >= length)
+		return;
+
+	result[I] = value1[I] + value2;
+}
+
+long cudaNeuralArrayAddValue(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralUnit value2)
+{
+	if ((result == 0) || (value1 == 0))
+		return 0;
+
+	if (result->arrayLength != value1->arrayLength)
+		return 0;
+
+	dim3 threadsPerBlock(512);
+	dim3 blocksPerGrid((result->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
+
+	kernelArrayAddValue << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, value1->arrayData, value2, result->arrayLength);
+
+	return cudaMemoryDeviceSynchronize();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArraySubtract(cudaNeuralUnit* result, cudaNeuralUnit* value1, cudaNeuralUnit* value2, unsigned long length)
 {
 	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -601,13 +628,40 @@ long cudaNeuralArraySubtract(cudaNeuralArray* result, cudaNeuralArray* value1, c
 	dim3 threadsPerBlock(512);
 	dim3 blocksPerGrid((result->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
 
-	kernelSubtract << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, value1->arrayData, value2->arrayData, result->arrayLength);
+	kernelArraySubtract << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, value1->arrayData, value2->arrayData, result->arrayLength);
 
 	return cudaMemoryDeviceSynchronize();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-__global__ void kernelMultiply(cudaNeuralUnit* result, cudaNeuralUnit* value1, cudaNeuralUnit* value2, unsigned long length)
+__global__ void kernelArraySubtractValue(cudaNeuralUnit* result, cudaNeuralUnit* value1, cudaNeuralUnit value2, unsigned long length)
+{
+	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
+
+	if (I >= length)
+		return;
+
+	result[I] = value1[I] - value2;
+}
+
+long cudaNeuralArraySubtractValue(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralUnit value2)
+{
+	if ((result == 0) || (value1 == 0))
+		return 0;
+
+	if (result->arrayLength != value1->arrayLength)
+		return 0;
+
+	dim3 threadsPerBlock(512);
+	dim3 blocksPerGrid((result->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
+
+	kernelArraySubtractValue << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, value1->arrayData, value2, result->arrayLength);
+
+	return cudaMemoryDeviceSynchronize();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArrayMultiply(cudaNeuralUnit* result, cudaNeuralUnit* value1, cudaNeuralUnit* value2, unsigned long length)
 {
 	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -629,13 +683,40 @@ long cudaNeuralArrayMultiply(cudaNeuralArray* result, cudaNeuralArray* value1, c
 	dim3 threadsPerBlock(512);
 	dim3 blocksPerGrid((result->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
 
-	kernelMultiply << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, value1->arrayData, value2->arrayData, result->arrayLength);
+	kernelArrayMultiply << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, value1->arrayData, value2->arrayData, result->arrayLength);
 
 	return cudaMemoryDeviceSynchronize();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-__global__ void kernelDivide(cudaNeuralUnit* result, cudaNeuralUnit* value1, cudaNeuralUnit* value2, unsigned long length)
+__global__ void kernelArrayMultiplyValue(cudaNeuralUnit* result, cudaNeuralUnit* value1, cudaNeuralUnit value2, unsigned long length)
+{
+	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
+
+	if (I >= length)
+		return;
+
+	result[I] = value1[I] * value2;
+}
+
+long cudaNeuralArrayMultiplyValue(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralUnit value2)
+{
+	if ((result == 0) || (value1 == 0))
+		return 0;
+
+	if (result->arrayLength != value1->arrayLength)
+		return 0;
+
+	dim3 threadsPerBlock(512);
+	dim3 blocksPerGrid((result->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
+
+	kernelArrayMultiplyValue << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, value1->arrayData, value2, result->arrayLength);
+
+	return cudaMemoryDeviceSynchronize();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArrayDivide(cudaNeuralUnit* result, cudaNeuralUnit* value1, cudaNeuralUnit* value2, unsigned long length)
 {
 	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -660,7 +741,37 @@ long cudaNeuralArrayDivide(cudaNeuralArray* result, cudaNeuralArray* value1, cud
 	dim3 threadsPerBlock(512);
 	dim3 blocksPerGrid((result->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
 
-	kernelDivide << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, value1->arrayData, value2->arrayData, result->arrayLength);
+	kernelArrayDivide << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, value1->arrayData, value2->arrayData, result->arrayLength);
+
+	return cudaMemoryDeviceSynchronize();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArrayDivideValue(cudaNeuralUnit* result, cudaNeuralUnit* value1, cudaNeuralUnit value2, unsigned long length)
+{
+	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
+
+	if (I >= length)
+		return;
+
+	if (value2 != 0)
+		result[I] = value1[I] * value2;
+	else
+		result[I] = 0;
+}
+
+long cudaNeuralArrayDivideValue(cudaNeuralArray* result, cudaNeuralArray* value1, cudaNeuralUnit value2)
+{
+	if ((result == 0) || (value1 == 0))
+		return 0;
+
+	if (result->arrayLength != value1->arrayLength)
+		return 0;
+
+	dim3 threadsPerBlock(512);
+	dim3 blocksPerGrid((result->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
+
+	kernelArrayDivideValue << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, value1->arrayData, value2, result->arrayLength);
 
 	return cudaMemoryDeviceSynchronize();
 }
@@ -716,19 +827,19 @@ long cudaNeuralArrayFlip3D(cudaNeuralArray* result, cudaNeuralArray* source, lon
 
 	dim3 threadsPerBlock(8, 8, 8);
 	dim3 blocksPerGrid(
-		    (result->arrayShape.shapeWidth + threadsPerBlock.x - 1) / threadsPerBlock.x,
-		    (result->arrayShape.shapeHeight + threadsPerBlock.y - 1) / threadsPerBlock.y,
-			(result->arrayShape.shapeDepth + threadsPerBlock.z - 1) / threadsPerBlock.z);
+		(result->arrayShape.shapeWidth + threadsPerBlock.x - 1) / threadsPerBlock.x,
+		(result->arrayShape.shapeHeight + threadsPerBlock.y - 1) / threadsPerBlock.y,
+		(result->arrayShape.shapeDepth + threadsPerBlock.z - 1) / threadsPerBlock.z);
 
-	kernelArrayFlip3D << < blocksPerGrid, threadsPerBlock >> >(
+	kernelArrayFlip3D << < blocksPerGrid, threadsPerBlock >> > (
 		result->arrayData,
-		source->arrayData, 
+		source->arrayData,
 		A, B, C,
 		result->arrayShape.shapeWidth,
 		result->arrayShape.shapeHeight,
 		result->arrayShape.shapeDepth);
 
-		return cudaMemoryDeviceSynchronize();				
+	return cudaMemoryDeviceSynchronize();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -957,11 +1068,316 @@ long cudaNeuralArrayGetMeanSquaredError(cudaNeuralArray* source, cudaNeuralArray
 
 	kernelArrayGetMeanSquaredError << < 1, 1 >> > (source->arrayData, target->arrayData, source->arrayLength);
 
-	cudaMemoryDeviceSynchronize();
+	if (cudaMemoryDeviceSynchronize())
+	{
+		*result = cudaRegister1;
 
-	*result = cudaRegister1;
+		return 1;
 
-	return 1;
+	}
+
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArrayGetSum(cudaNeuralUnit* source, unsigned long length)
+{
+	unsigned long   I;
+	cudaNeuralUnit  sum;
+
+	sum = 0;
+	for (I = 0; I < length; I++)
+	{
+		sum += source[I];
+	}
+
+	cudaRegister1 = sum;
+}
+
+long cudaNeuralArrayGetSum(cudaNeuralArray* source, cudaNeuralUnit* result)
+{
+	if ((source == 0) || (result == 0))
+		return 0;
+
+	kernelArrayGetSum << < 1, 1 >> > (source->arrayData, source->arrayLength);
+
+	if (cudaMemoryDeviceSynchronize())
+	{
+		*result = cudaRegister1;
+
+		return 1;
+	}
+
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArrayGetMean(cudaNeuralUnit* source, unsigned long length)
+{
+	unsigned long   I;
+	cudaNeuralUnit  sum;
+
+	sum = 0;
+	for (I = 0; I < length; I++)
+	{
+		sum += source[I];
+	}
+
+	if (length > 1)
+		sum = sum / length;
+
+	cudaRegister1 = sum;
+}
+
+long cudaNeuralArrayGetMean(cudaNeuralArray* source, cudaNeuralUnit* result)
+{
+	if ((source == 0) || (result == 0))
+		return 0;
+
+	kernelArrayGetMean << < 1, 1 >> > (source->arrayData, source->arrayLength);
+
+	if (cudaMemoryDeviceSynchronize())
+	{
+		*result = cudaRegister1;
+
+		return 1;
+	}
+
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArrayGetMagnitude(cudaNeuralUnit* source, unsigned long length)
+{
+	unsigned long   I;
+	cudaNeuralUnit  sum;
+
+	sum = 0;
+	for (I = 0; I < length; I++)
+	{
+		sum += source[I] * source[I];
+	}
+
+	cudaRegister1 = sqrt(sum);
+}
+
+long cudaNeuralArrayGetMagnitude(cudaNeuralArray* source, cudaNeuralUnit* result)
+{
+	if ((source == 0) || (result == 0))
+		return 0;
+
+	kernelArrayGetMagnitude << < 1, 1 >> > (source->arrayData, source->arrayLength);
+
+	if (cudaMemoryDeviceSynchronize())
+	{
+		*result = cudaRegister1;
+
+		return 1;
+	}
+
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArrayGetDotProduct(cudaNeuralUnit* source1, cudaNeuralUnit* source2, unsigned long length)
+{
+	unsigned long   I;
+	cudaNeuralUnit  sum;
+
+	sum = 0;
+	for (I = 0; I < length; I++)
+	{
+		sum += source1[I] * source2[I];
+	}
+
+	cudaRegister1 = sum;
+}
+
+long cudaNeuralArrayGetDotProduct(cudaNeuralArray* source1, cudaNeuralArray* source2, cudaNeuralUnit* result)
+{
+	if ((source1 == 0) || (source2 == 0) || (result == 0))
+		return 0;
+
+	if (source1->arrayLength != source2->arrayLength)
+		return 0;
+
+	kernelArrayGetDotProduct << < 1, 1 >> > (source1->arrayData, source2->arrayData, source2->arrayLength);
+
+	if (cudaMemoryDeviceSynchronize())
+	{
+		*result = cudaRegister1;
+
+		return 1;
+	}
+
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArrayGetEucledeanDistance(cudaNeuralUnit* source1, cudaNeuralUnit* source2, unsigned long length)
+{
+	unsigned long   I;
+	cudaNeuralUnit  sum;
+
+	sum = 0;
+	for (I = 0; I < length; I++)
+	{
+		sum += (source1[I] - source2[I]) * (source1[I] - source2[I]);
+	}
+
+	cudaRegister1 = sqrt(sum);
+}
+
+long cudaNeuralArrayGetEucledeanDistance(cudaNeuralArray* source1, cudaNeuralArray* source2, cudaNeuralUnit* result)
+{
+	if ((source1 == 0) || (source2 == 0) || (result == 0))
+		return 0;
+
+	if (source1->arrayLength != source2->arrayLength)
+		return 0;
+
+	kernelArrayGetEucledeanDistance << < 1, 1 >> > (source1->arrayData, source2->arrayData, source2->arrayLength);
+
+	if (cudaMemoryDeviceSynchronize())
+	{
+		*result = cudaRegister1;
+
+		return 1;
+	}
+
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+long cudaNeuralArrayGetCosineSimilarity(cudaNeuralArray* source1, cudaNeuralArray* source2, cudaNeuralUnit* result)
+{
+	cudaNeuralUnit   mag1, mag2, dot;
+
+	if ((source1 == 0) || (source2 == 0) || (result == 0))
+		return 0;
+
+	if (source1->arrayLength != source2->arrayLength)
+		return 0;
+
+	if (cudaNeuralArrayGetMagnitude(source1, &mag1))
+		if (cudaNeuralArrayGetMagnitude(source2, &mag2))
+			if (cudaNeuralArrayGetDotProduct(source1, source2, &dot))
+			{
+				*result = dot / (mag1 * mag2);
+
+				return 1;
+			}
+
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+long cudaNeuralArrayNormalize(cudaNeuralArray* result, cudaNeuralArray* source)
+{
+	cudaNeuralUnit   mag;
+
+	if ((result == 0) || (source == 0))
+		return 0;
+
+	if (result->arrayLength != source->arrayLength)
+		return 0;
+
+	if (cudaNeuralArrayGetMagnitude(source, &mag))
+		if (cudaNeuralArrayDivideValue(result, source, mag))
+			{
+				return 1;
+			}
+
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArrayShuffle(cudaNeuralUnit* result, unsigned long seed, unsigned long length)
+{
+	unsigned long   I, J;
+	cudaNeuralUnit  temp;
+	curandState     state;
+
+	curand_init(seed, 0, 0, &state);
+
+	for (I = 0; I < length; I++)
+	{
+		J = curand(&state);
+
+		temp = result[I];
+		result[I] = result[J];
+		result[J] = temp;
+	}
+}
+
+long cudaNeuralArrayShuffle(cudaNeuralArray* result)
+{
+	if (result == 0)
+		return 0;
+
+	kernelArrayShuffle << < 1, 1 >> > (result->arrayData, clock(), result->arrayLength);
+
+	return cudaMemoryDeviceSynchronize();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArrayConcatenate(cudaNeuralUnit* result, cudaNeuralUnit* source1, cudaNeuralUnit* source2, unsigned long length0, unsigned long length1, unsigned long length2)
+{
+	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
+
+	if (I >= length0)
+		return;
+
+	if (I < length1)
+		result[I] = source1[I];
+	else
+		result[I] = source2[I - length1];
+}
+
+long cudaNeuralArrayConcatenate(cudaNeuralArray* result, cudaNeuralArray* source1, cudaNeuralArray* source2)
+{
+	if ((result == 0) || (source1 == 0) || (source2 == 0))
+		return 0;
+
+	if (result->arrayLength != (source1->arrayLength + source2->arrayLength))
+		return 0;
+
+	dim3 threadsPerBlock(512);
+	dim3 blocksPerGrid((result->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
+
+	kernelArrayConcatenate << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, source1->arrayData, source2->arrayData, result->arrayLength, source1->arrayLength, source2->arrayLength);
+
+	return cudaMemoryDeviceSynchronize();
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+__global__ void kernelArraySplit(cudaNeuralUnit* result, cudaNeuralUnit* source1, cudaNeuralUnit* source2, unsigned long length0, unsigned long length1, unsigned long length2)
+{
+	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
+
+	if (I >= length0)
+		return;
+
+	if (I < length1)
+		source1[I] = result[I];
+	else
+		source2[I - length1] = result[I];
+}
+
+long cudaNeuralArraySplit(cudaNeuralArray* result, cudaNeuralArray* source1, cudaNeuralArray* source2)
+{
+	if ((result == 0) || (source1 == 0) || (source2 == 0))
+		return 0;
+
+	if (result->arrayLength != (source1->arrayLength + source2->arrayLength))
+		return 0;
+
+	dim3 threadsPerBlock(512);
+	dim3 blocksPerGrid((result->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
+
+	kernelArraySplit << < blocksPerGrid, threadsPerBlock >> > (result->arrayData, source1->arrayData, source2->arrayData, result->arrayLength, source1->arrayLength, source2->arrayLength);
+
+	return cudaMemoryDeviceSynchronize();
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -1640,7 +2056,7 @@ long cudaNeuralArrayMatrixForward(cudaNeuralArray* result, cudaNeuralArray* sour
 	dim3 threadsPerBlock(512);
 	dim3 blocksPerGrid((result->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
 
-	kernelArrayMatrixForward << < blocksPerGrid, threadsPerBlock >> > 
+	kernelArrayMatrixForward << < blocksPerGrid, threadsPerBlock >> >
 		(result->arrayData, source->arrayData, weights->arrayData, result->arrayLength, source->arrayLength);
 
 	return cudaMemoryDeviceSynchronize();
@@ -1828,12 +2244,12 @@ long cudaNeuralArrayTransferReverse(cudaNeuralArray* result, cudaNeuralArray* so
 
 //////////////////////////////////////////////////////////////////////////////////
 __global__ void kernelArrayTransferFocus(
-	cudaNeuralUnit* result, 
-	cudaNeuralUnit* source, 
-	cudaNeuralUnit* outputs, 
-	cudaNeuralUnit* target, 
-	cudaNeuralUnit  lambda, 
-	cudaNeuralUnit  range, 
+	cudaNeuralUnit* result,
+	cudaNeuralUnit* source,
+	cudaNeuralUnit* outputs,
+	cudaNeuralUnit* target,
+	cudaNeuralUnit  lambda,
+	cudaNeuralUnit  range,
 	unsigned long length)
 {
 	unsigned long  I = blockDim.x * blockIdx.x + threadIdx.x;
@@ -1891,7 +2307,7 @@ long cudaNeuralArrayUpdateMomentum(cudaNeuralArray* weights, cudaNeuralArray* ve
 	dim3 threadsPerBlock(512);
 	dim3 blocksPerGrid((weights->arrayLength + threadsPerBlock.x - 1) / threadsPerBlock.x);
 
-	kernelArrayUpdateMomentum << < blocksPerGrid, threadsPerBlock >> > 
+	kernelArrayUpdateMomentum << < blocksPerGrid, threadsPerBlock >> >
 		(weights->arrayData, vectors->arrayData, deltas->arrayData, learningrate, momentum, weights->arrayLength);
 
 	return cudaMemoryDeviceSynchronize();
@@ -1922,7 +2338,7 @@ long cudaNeuralArrayUpdateAdagrad(cudaNeuralArray* weights, cudaNeuralArray* vec
 		return 0;
 
 	if ((weights->arrayLength != vectors->arrayLength) ||
-		(weights->arrayLength != gammas->arrayLength) || 
+		(weights->arrayLength != gammas->arrayLength) ||
 		(weights->arrayLength != deltas->arrayLength))
 		return 0;
 
