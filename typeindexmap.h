@@ -15,10 +15,10 @@ typedef struct
 } typeIndexMap;
 
 long typeIndexMapCreate(typeIndexMap* parent, unsigned long width, unsigned long height);
-long typeIndexMapCreateFlip(typeIndexMap* parent, typeShape* result, typeShape* source, long A, long B, long C);
-long typeIndexMapCreateShift(typeIndexMap* parent, typeShape* result, typeShape* source, long A, long B, long C);
-long typeIndexMapCreateZoom(typeIndexMap* parent, typeShape* result, typeShape* source, double A, double B, double C);
-long typeIndexMapCreateScale3D(typeIndexMap* parent, typeShape* result, typeShape* source);
+long typeIndexMapCreateFlip2D(typeIndexMap* parent, typeShape* result, typeShape* source, long A, long B, long C);
+long typeIndexMapCreateShift2D(typeIndexMap* parent, typeShape* result, typeShape* source, long A, long B, long C);
+long typeIndexMapCreateZoom2D(typeIndexMap* parent, typeShape* result, typeShape* source, double A, double B, double C);
+long typeIndexMapCreateScale2D(typeIndexMap* parent, typeShape* result, typeShape* source);
 long typeIndexMapCreateScale2D(typeIndexMap* parent, typeShape* result, typeShape* source);
 long typeIndexMapCreateRotate2D(typeIndexMap* parent, typeShape* result, typeShape* source, double angle);
 long typeIndexMapCreateConvolution2D(typeIndexMap* parent, typeShape* result, typeShape* source, unsigned long filterwidth, unsigned filterheight);
@@ -65,29 +65,27 @@ long typeIndexMapCreate(typeIndexMap* parent, unsigned long width, unsigned long
 	return 0;
 }
 
-long typeIndexMapCreateFlip(typeIndexMap* parent, typeShape* result, typeShape* source, long A, long B, long C)
+long typeIndexMapCreateFlip2D(typeIndexMap* parent, typeShape* result, typeShape* source, long A, long B, long C)
 {
 	unsigned long  resultindex;
 	unsigned long  sourceindex;
-	unsigned long  I, J, K;
-	unsigned long  X, Y, Z;
+	unsigned long  I, J;
+	long		   X, Y;
 
-	if (typeIndexMapCreate(parent, typeShapeGetLength(result), 1))
+	if (typeIndexMapCreate(parent, (result->shapeWidth * result->shapeHeight), 1))
 	{
-		for (K = 0; K < result->shapeDepth; K++)
-			for (J = 0; J < result->shapeHeight; J++)
-				for (I = 0; I < result->shapeWidth; I++)
-				{
-					resultindex = typeShapeGetIndex(result, I, J, K);
+		for (J = 0; J < result->shapeHeight; J++)
+			for (I = 0; I < result->shapeWidth; I++)
+			{
+				resultindex = typeShapeGetIndex(result, I, J, 0);
 
-					X = A ? (result->shapeWidth - I - 1) : I;
-					Y = B ? (result->shapeHeight - J - 1) : J;
-					Z = C ? (result->shapeDepth - K - 1) : K;
+				X = A ? (result->shapeWidth - I - 1) : I;
+				Y = B ? (result->shapeHeight - J - 1) : J;
 
-					sourceindex = typeShapeGetIndex(source, X, Y, Z);
+				sourceindex = typeShapeGetIndex(source, X, Y, 0);
 
-					typeIndexMapAddValue(parent, resultindex, sourceindex);
-				}
+				typeIndexMapAddValue(parent, resultindex, sourceindex);
+			}
 
 		return 1;
 	}
@@ -95,29 +93,27 @@ long typeIndexMapCreateFlip(typeIndexMap* parent, typeShape* result, typeShape* 
 	return 0;
 }
 
-long typeIndexMapCreateShift(typeIndexMap* parent, typeShape* result, typeShape* source, long A, long B, long C)
+long typeIndexMapCreateShift2D(typeIndexMap* parent, typeShape* result, typeShape* source, long A, long B, long C)
 {
 	unsigned long  resultindex;
 	unsigned long  sourceindex;
-	unsigned long  I, J, K;
-	unsigned long  X, Y, Z;
+	unsigned long  I, J;
+	long		   X, Y;
 
-	if (typeIndexMapCreate(parent, typeShapeGetLength(result), 1))
+	if (typeIndexMapCreate(parent, (result->shapeWidth * result->shapeHeight), 1))
 	{
-		for (K = 0; K < result->shapeDepth; K++)
-			for (J = 0; J < result->shapeHeight; J++)
-				for (I = 0; I < result->shapeWidth; I++)
-				{
-					resultindex = typeShapeGetIndex(result, I, J, K);
+		for (J = 0; J < result->shapeHeight; J++)
+			for (I = 0; I < result->shapeWidth; I++)
+			{
+				resultindex = typeShapeGetIndex(result, I, J, 0);
 
-					X = (long)I - A;
-					Y = (long)J - B;
-					Z = (long)K - C;
+				X = (long)I + A;
+				Y = (long)J + B;
 
-					sourceindex = typeShapeGetIndex(source, X, Y, Z);
+				sourceindex = typeShapeGetIndex(source, X, Y, 0);
 
-					typeIndexMapAddValue(parent, resultindex, sourceindex);
-				}
+				typeIndexMapAddValue(parent, resultindex, sourceindex);
+			}
 
 		return 1;
 	}
@@ -125,34 +121,31 @@ long typeIndexMapCreateShift(typeIndexMap* parent, typeShape* result, typeShape*
 	return 0;
 }
 
-long typeIndexMapCreateZoom(typeIndexMap* parent, typeShape* result, typeShape* source, double A, double B, double C)
+long typeIndexMapCreateZoom2D(typeIndexMap* parent, typeShape* result, typeShape* source, double A, double B, double C)
 {
 	unsigned long  resultindex;
 	unsigned long  sourceindex;
-	unsigned long  I, J, K;
-	long           X, Y, Z;
-	double         XC, YC, ZC;
+	unsigned long  I, J;
+	long           X, Y;
+	double         XC, YC;
 
-	if (typeIndexMapCreate(parent, typeShapeGetLength(result), 1))
+	if (typeIndexMapCreate(parent, (result->shapeWidth * result->shapeHeight), 1))
 	{
 		XC = (double)result->shapeWidth / 2;
 		YC = (double)result->shapeHeight / 2;
-		ZC = (double)result->shapeDepth / 2;
 
-		for (K = 0; K < result->shapeDepth; K++)
-			for (J = 0; J < result->shapeHeight; J++)
-				for (I = 0; I < result->shapeWidth; I++)
-				{
-					resultindex = typeShapeGetIndex(result, I, J, K);
+		for (J = 0; J < result->shapeHeight; J++)
+			for (I = 0; I < result->shapeWidth; I++)
+			{
+				resultindex = typeShapeGetIndex(result, I, J, 0);
 
-					X = (long)((I - XC) * A + XC);
-					Y = (long)((J - YC) * B + YC);
-					Z = (long)((I - ZC) * C + ZC);
+				X = (long)((I - XC) * A + XC);
+				Y = (long)((J - YC) * B + YC);
 
-					sourceindex = typeShapeGetIndex(source, X, Y, Z);
+				sourceindex = typeShapeGetIndex(source, X, Y, 0);
 
-					typeIndexMapAddValue(parent, resultindex, sourceindex);
-				}
+				typeIndexMapAddValue(parent, resultindex, sourceindex);
+			}
 
 		return 1;
 	}

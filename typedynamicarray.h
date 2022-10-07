@@ -10,6 +10,7 @@ typedef struct
 
 long typeDynamicArrayCreate(typeDynamicArray* parent, unsigned long pagesize);
 long typeDynamicArrayResize(typeDynamicArray* parent, unsigned long length, unsigned long pagesize);
+long typeDynamicArrayGetDataAddress(typeDynamicArray* parent, void** result);
 long typeDynamicArrayDestroy(typeDynamicArray* parent);
 
 long typeDynamicArrayCreate(typeDynamicArray* parent, unsigned long pagesize)
@@ -65,6 +66,19 @@ long typeDynamicArrayResize(typeDynamicArray* parent, unsigned long length, unsi
 	}
 
 	return 0;
+}
+
+long typeDynamicArrayGetDataAddress(typeDynamicArray* parent, void** result)
+{
+	if ((parent == 0) || (result == 0))
+		return 0;
+
+	if (parent->arrayData == 0)
+		return 0;
+
+	*result = parent->arrayData;
+
+	return 1;
 }
 
 long typeDynamicArrayDestroy(typeDynamicArray* parent)

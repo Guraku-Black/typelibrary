@@ -44,7 +44,7 @@ long typeNeuralNetworkCreate(typeNeuralNetwork* parent)
 
 	if (typeDynamicArrayCreate(&parent->networkData, neuralnetwork_page))
 	{
-		parent->networkOptimizer = TYPE_OPTIMIZER_MOMENTUM;
+		parent->networkOptimizer = TYPE_OPTIMIZER_ADAM;
 		parent->networkMomentum  = 0.09;
 		parent->networkLearningRate = 0.001;
 		parent->networkLength = 0;
@@ -68,9 +68,10 @@ static typeNeuralLayer* typeNeuralNetworkAddLayer(typeNeuralNetwork* parent)
 	{
 		parent->networkLength++;
 
-		layers = (typeNeuralLayer*)parent->networkData.arrayData;
-
-		return &layers[parent->networkLength - 1];
+		if (typeDynamicArrayGetDataAddress(&parent->networkData, (void**)&layers))
+		{
+			return &layers[parent->networkLength - 1];
+		}
 	}
 
 	return 0;
@@ -181,10 +182,8 @@ long typeNeuralNetworkFeedForwardArray(typeNeuralNetwork* parent, cudaNeuralArra
 
 	if (parent == 0)
 		return 0;
-
-	layers = (typeNeuralLayer*)parent->networkData.arrayData;
-
-	if (layers)
+		
+	if (typeDynamicArrayGetDataAddress(&parent->networkData, (void**)&layers))
 	{
 		cudaNeuralArrayCopy(&layers[0].layerOutputs, source);
 
@@ -201,9 +200,7 @@ long typeNeuralNetworkBackPropagateArray(typeNeuralNetwork* parent, cudaNeuralAr
 	if (parent == 0)
 		return 0;
 
-	layers = (typeNeuralLayer*)parent->networkData.arrayData;
-
-	if (layers)
+	if (typeDynamicArrayGetDataAddress(&parent->networkData, (void**)&layers))
 	{
 		cudaNeuralArraySubtract(
 			&layers[parent->networkLength - 1].layerDeltas, 
@@ -223,9 +220,7 @@ long typeNeuralNetworkGetOutputs(typeNeuralNetwork* parent, cudaNeuralArray* res
 	if (parent == 0)
 		return 0;
 
-	layers = (typeNeuralLayer*)parent->networkData.arrayData;
-
-	if (layers)
+	if (typeDynamicArrayGetDataAddress(&parent->networkData, (void**)&layers))
 	{
 		return cudaNeuralArrayCopy(result, &layers[parent->networkLength - 1].layerOutputs);
 	}
@@ -244,9 +239,7 @@ long typeNeuralNetworkFeedForward(typeNeuralNetwork* parent)
 	if (parent->networkLength < 2)
 		return 0;
 
-	layers = (typeNeuralLayer*)parent->networkData.arrayData;
-
-	if (layers)
+	if (typeDynamicArrayGetDataAddress(&parent->networkData, (void**)&layers))
 	{
 		for (I = 0; I < (parent->networkLength - 1); I++)
 		{
@@ -291,9 +284,7 @@ long typeNeuralNetworkBackPropagate(typeNeuralNetwork* parent)
 	if (parent->networkLength < 2)
 		return 0;
 
-	layers = (typeNeuralLayer*)parent->networkData.arrayData;
-
-	if (layers)
+	if (typeDynamicArrayGetDataAddress(&parent->networkData, (void**)&layers))
 	{
 		for (I = (parent->networkLength - 2); I >= 0; I--)
 		{
@@ -338,9 +329,7 @@ long typeNeuralNetworkUpdateWeights(typeNeuralNetwork* parent)
 	if (parent->networkLength < 2)
 		return 0;
 
-	layers = (typeNeuralLayer*)parent->networkData.arrayData;
-
-	if (layers)
+	if (typeDynamicArrayGetDataAddress(&parent->networkData, (void**)&layers))
 	{
 		for (I = 0; I < (parent->networkLength - 1); I++)
 		{
@@ -367,9 +356,7 @@ long typeNeuralNetworkDestroy(typeNeuralNetwork* parent)
 	if (parent == 0)
 		return 0;
 
-	layers = (typeNeuralLayer*)parent->networkData.arrayData;
-
-	if (layers)
+	if (typeDynamicArrayGetDataAddress(&parent->networkData, (void**)&layers))
 	{
 		for (I = 0; I < parent->networkLength; I++)
 		{
